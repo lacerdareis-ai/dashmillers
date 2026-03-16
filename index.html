@@ -1,1551 +1,670 @@
 <!DOCTYPE html>
-<!-- saved from url=(0064)file:///Users/lacerdareis/Downloads/millers_sales_dashboard.html -->
-<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
+<html lang="en">
+<head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Millers Sales Dashboard 2026</title>
-<link href="./Millers Sales Dashboard 2026_files/css2" rel="stylesheet">
-<script src="./Millers Sales Dashboard 2026_files/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
   :root {
     --bg: #0a0c10;
     --surface: #111318;
     --surface2: #181c24;
-    --border: #1f2433;
-    --accent: #e8ff47;
-    --accent2: #47c4ff;
-    --accent3: #ff6b47;
-    --accent4: #a78bfa;
-    --text: #e8eaf0;
-    --muted: #5a6180;
-    --green: #4ade80;
-    --red: #f87171;
+    --border: #1e2330;
+    --accent: #e8b94f;
+    --accent2: #4fc3e8;
+    --green: #3de87a;
+    --red: #e84f4f;
+    --text: #f0f2f8;
+    --muted: #6b7491;
+    --divisions: #e8b94f,#4fc3e8,#3de87a,#e87a4f,#b44fe8,#e84f9a;
   }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'Barlow',sans-serif; font-size:14px; min-height:100vh; }
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 300;
-    min-height: 100vh;
-    padding: 32px;
+  /* LOADER */
+  #loader {
+    position:fixed; inset:0; background:var(--bg); display:flex; flex-direction:column;
+    align-items:center; justify-content:center; z-index:1000; gap:16px;
   }
+  #loader .logo { font-family:'Barlow Condensed',sans-serif; font-size:32px; font-weight:800; letter-spacing:2px; color:var(--accent); }
+  #loader .sub { color:var(--muted); font-size:13px; letter-spacing:3px; text-transform:uppercase; }
+  .spinner { width:36px; height:36px; border:3px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin .7s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  #loader.hidden { opacity:0; pointer-events:none; transition:opacity .4s; }
 
-  /* Grid noise texture */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(var(--border) 1px, transparent 1px),
-      linear-gradient(90deg, var(--border) 1px, transparent 1px);
-    background-size: 48px 48px;
-    opacity: 0.3;
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .wrapper { position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; }
-
-  /* ── Header ── */
+  /* HEADER */
   header {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    margin-bottom: 40px;
-    padding-bottom: 24px;
-    border-bottom: 1px solid var(--border);
-    animation: fadeUp .6s ease both;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 28px; border-bottom:1px solid var(--border);
+    background:var(--surface); position:sticky; top:0; z-index:100;
+  }
+  .brand { display:flex; align-items:center; gap:12px; }
+  .brand-mark { width:36px; height:36px; background:var(--accent); border-radius:6px; display:flex; align-items:center; justify-content:center; }
+  .brand-mark svg { width:20px; height:20px; fill:var(--bg); }
+  .brand-name { font-family:'Barlow Condensed',sans-serif; font-size:20px; font-weight:800; letter-spacing:1px; }
+  .brand-sub { font-size:11px; color:var(--muted); letter-spacing:2px; text-transform:uppercase; }
+  .header-right { display:flex; align-items:center; gap:16px; }
+  .last-updated { font-size:11px; color:var(--muted); }
+  .refresh-btn {
+    background:var(--surface2); border:1px solid var(--border); color:var(--text);
+    padding:6px 14px; border-radius:6px; font-size:12px; font-family:'Barlow',sans-serif;
+    cursor:pointer; letter-spacing:1px; transition:all .2s;
+  }
+  .refresh-btn:hover { border-color:var(--accent); color:var(--accent); }
+
+  /* NAV TABS */
+  .nav-tabs {
+    display:flex; gap:0; padding:0 28px;
+    background:var(--surface); border-bottom:1px solid var(--border);
+  }
+  .tab-btn {
+    padding:12px 20px; font-family:'Barlow Condensed',sans-serif; font-size:13px;
+    font-weight:600; letter-spacing:2px; text-transform:uppercase; color:var(--muted);
+    background:none; border:none; border-bottom:2px solid transparent;
+    cursor:pointer; transition:all .2s; white-space:nowrap;
+  }
+  .tab-btn:hover { color:var(--text); }
+  .tab-btn.active { color:var(--accent); border-bottom-color:var(--accent); }
+
+  /* MAIN */
+  main { padding:24px 28px; max-width:1600px; margin:0 auto; }
+  .tab-panel { display:none; }
+  .tab-panel.active { display:block; }
+
+  /* SECTION TITLE */
+  .section-title {
+    font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:600;
+    letter-spacing:3px; text-transform:uppercase; color:var(--muted);
+    margin-bottom:16px; padding-bottom:8px; border-bottom:1px solid var(--border);
   }
 
-  .brand-tag {
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    letter-spacing: .15em;
-    color: var(--muted);
-    text-transform: uppercase;
-    margin-bottom: 8px;
+  /* KPI GRID */
+  .kpi-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr)); gap:12px; margin-bottom:28px; }
+  .kpi-card {
+    background:var(--surface); border:1px solid var(--border); border-radius:10px;
+    padding:18px 20px; transition:border-color .2s;
   }
-
-  h1 {
-    font-family: 'Syne', sans-serif;
-    font-size: clamp(28px, 4vw, 52px);
-    font-weight: 800;
-    line-height: 1;
-    letter-spacing: -.02em;
-  }
-
-  h1 span { color: var(--accent); }
-
-  .header-meta {
-    text-align: right;
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    color: var(--muted);
-    line-height: 1.8;
-  }
-
-  /* ── Tab Bar ── */
-  .tabs {
-    display: flex;
-    gap: 4px;
-    margin-bottom: 32px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 4px;
-    width: fit-content;
-    animation: fadeUp .6s .1s ease both;
-  }
-
-  .tab {
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    letter-spacing: .05em;
-    text-transform: uppercase;
-    padding: 8px 20px;
-    border-radius: 8px;
-    border: none;
-    background: transparent;
-    color: var(--muted);
-    cursor: pointer;
-    transition: all .2s;
-  }
-
-  .tab.active {
-    background: var(--accent);
-    color: #000;
-    font-weight: 500;
-  }
-
-  .tab:hover:not(.active) { color: var(--text); background: var(--surface2); }
-
-  /* ── Tab Content ── */
-  .tab-content { display: none; }
-  .tab-content.active { display: block; }
-
-  /* ── KPI Row ── */
-  .kpi-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 16px;
-    margin-bottom: 32px;
-    animation: fadeUp .6s .15s ease both;
-  }
-
-  .kpi {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 20px 24px;
-    position: relative;
-    overflow: hidden;
-    transition: border-color .2s, transform .2s;
-  }
-
-  .kpi:hover { border-color: var(--accent); transform: translateY(-2px); }
-
-  .kpi::after {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: var(--kpi-color, var(--accent));
-  }
-
-  .kpi-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 8px;
-  }
-
-  .kpi-value {
-    font-family: 'Syne', sans-serif;
-    font-size: 28px;
-    font-weight: 700;
-    line-height: 1;
-    margin-bottom: 4px;
-  }
-
-  .kpi-sub {
-    font-size: 12px;
-    color: var(--muted);
-  }
-
+  .kpi-card:hover { border-color:var(--accent); }
+  .kpi-label { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
+  .kpi-value { font-family:'Barlow Condensed',sans-serif; font-size:28px; font-weight:800; line-height:1; }
+  .kpi-sub { font-size:11px; color:var(--muted); margin-top:6px; }
   .kpi-badge {
-    display: inline-block;
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    padding: 2px 8px;
-    border-radius: 99px;
-    margin-top: 6px;
+    display:inline-block; padding:2px 8px; border-radius:4px; font-size:10px;
+    font-weight:600; letter-spacing:1px; margin-top:6px;
   }
+  .badge-green { background:rgba(61,232,122,.15); color:var(--green); }
+  .badge-red { background:rgba(232,79,79,.15); color:var(--red); }
+  .badge-yellow { background:rgba(232,185,79,.15); color:var(--accent); }
 
-  .badge-green { background: rgba(74,222,128,.12); color: var(--green); }
-  .badge-red { background: rgba(248,113,113,.12); color: var(--red); }
-  .badge-yellow { background: rgba(232,255,71,.12); color: var(--accent); }
-
-  /* ── Grid Layouts ── */
-  .grid-2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    margin-bottom: 20px;
-    animation: fadeUp .6s .2s ease both;
+  /* DIVISION GRID */
+  .div-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(340px, 1fr)); gap:16px; margin-bottom:28px; }
+  .div-card {
+    background:var(--surface); border:1px solid var(--border); border-radius:10px;
+    padding:20px; transition:border-color .2s;
   }
+  .div-card:hover { border-color:var(--border); }
+  .div-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .div-name { font-family:'Barlow Condensed',sans-serif; font-size:16px; font-weight:700; letter-spacing:1px; }
+  .div-color { width:6px; height:6px; border-radius:50%; display:inline-block; margin-right:6px; }
+  .div-pct { font-family:'Barlow Condensed',sans-serif; font-size:24px; font-weight:800; }
+  .progress-track { height:4px; background:var(--border); border-radius:2px; margin:8px 0 12px; overflow:hidden; }
+  .progress-fill { height:100%; border-radius:2px; transition:width .8s ease; }
+  .div-stats { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+  .div-stat-label { font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--muted); }
+  .div-stat-val { font-family:'Barlow Condensed',sans-serif; font-size:15px; font-weight:700; margin-top:2px; }
 
-  .grid-3 {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 20px;
-    margin-bottom: 20px;
-    animation: fadeUp .6s .25s ease both;
+  /* SCORECARD TABLE */
+  .scorecard-wrap { overflow-x:auto; margin-bottom:28px; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  thead th {
+    padding:10px 12px; text-align:left; font-size:10px; letter-spacing:2px;
+    text-transform:uppercase; color:var(--muted); font-weight:600;
+    border-bottom:1px solid var(--border); white-space:nowrap;
   }
-
-  @media (max-width: 900px) {
-    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  tbody tr { border-bottom:1px solid var(--border); transition:background .15s; }
+  tbody tr:hover { background:var(--surface2); }
+  tbody tr.total-row { background:var(--surface2); font-weight:600; }
+  tbody td { padding:9px 12px; white-space:nowrap; }
+  td.num { text-align:right; font-family:'Barlow Condensed',sans-serif; font-size:14px; }
+  td.pct-cell { text-align:right; }
+  .pct-pill {
+    display:inline-block; padding:2px 7px; border-radius:4px; font-size:11px;
+    font-weight:600; min-width:44px; text-align:center;
   }
+  .pct-0 { background:rgba(232,79,79,.12); color:var(--red); }
+  .pct-low { background:rgba(232,185,79,.12); color:var(--accent); }
+  .pct-mid { background:rgba(79,195,232,.12); color:var(--accent2); }
+  .pct-high { background:rgba(61,232,122,.12); color:var(--green); }
+  .pct-fire { background:rgba(61,232,122,.2); color:#aeffca; }
 
-  /* ── Card ── */
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 24px;
-    transition: border-color .2s;
+  /* CHARTS GRID */
+  .charts-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(460px, 1fr)); gap:16px; margin-bottom:28px; }
+  .chart-card {
+    background:var(--surface); border:1px solid var(--border); border-radius:10px;
+    padding:20px;
   }
+  .chart-title { font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:16px; }
+  .chart-wrap { position:relative; height:220px; }
 
-  .card:hover { border-color: rgba(232,255,71,.2); }
-
-  .card-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 14px;
-    font-weight: 700;
-    letter-spacing: .03em;
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+  /* DIV SELECTOR */
+  .div-selector { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px; }
+  .div-sel-btn {
+    padding:6px 14px; border-radius:6px; font-size:12px; font-weight:600;
+    letter-spacing:1px; border:1px solid var(--border); background:var(--surface2);
+    color:var(--muted); cursor:pointer; transition:all .2s;
   }
+  .div-sel-btn.active { color:var(--bg); border-color:transparent; }
 
-  .card-title .dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: var(--dot-color, var(--accent));
-    flex-shrink: 0;
+  /* RESPONSIVE */
+  @media(max-width:640px) {
+    header { padding:12px 16px; }
+    main { padding:16px; }
+    .nav-tabs { padding:0 16px; overflow-x:auto; }
+    .kpi-grid { grid-template-columns:repeat(2,1fr); }
+    .div-grid { grid-template-columns:1fr; }
+    .charts-grid { grid-template-columns:1fr; }
   }
-
-  /* ── Chart Container ── */
-  .chart-wrap { position: relative; height: 220px; }
-
-  /* ── Progress Bars ── */
-  .progress-list { display: flex; flex-direction: column; gap: 14px; }
-
-  .progress-item {}
-  .progress-header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 6px;
-    font-size: 13px;
-  }
-  .progress-name { color: var(--text); font-weight: 500; }
-  .progress-nums {
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    color: var(--muted);
-  }
-
-  .progress-track {
-    height: 6px;
-    background: var(--border);
-    border-radius: 99px;
-    overflow: hidden;
-  }
-
-  .progress-fill {
-    height: 100%;
-    border-radius: 99px;
-    background: var(--fill-color, var(--accent));
-    transition: width 1.2s cubic-bezier(.16,1,.3,1);
-    width: 0;
-  }
-
-  /* ── Table ── */
-  .data-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-  }
-
-  .data-table th {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    color: var(--muted);
-    padding: 8px 12px;
-    text-align: left;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .data-table td {
-    padding: 10px 12px;
-    border-bottom: 1px solid rgba(31,36,51,.5);
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-  }
-
-  .data-table tr:last-child td { border-bottom: none; }
-  .data-table tr:hover td { background: var(--surface2); }
-
-  .data-table .total-row td {
-    font-weight: 500;
-    color: var(--accent);
-    border-top: 1px solid var(--border);
-    border-bottom: none;
-  }
-
-  .num-positive { color: var(--green); }
-  .num-negative { color: var(--red); }
-  .num-neutral { color: var(--muted); }
-
-  /* ── Funnel ── */
-  .funnel { display: flex; flex-direction: column; gap: 8px; }
-  .funnel-step {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .funnel-bar-wrap { flex: 1; }
-  .funnel-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    color: var(--muted);
-    width: 90px;
-    flex-shrink: 0;
-  }
-  .funnel-num {
-    font-family: 'Syne', monospace;
-    font-size: 14px;
-    font-weight: 700;
-    width: 60px;
-    text-align: right;
-    flex-shrink: 0;
-  }
-  .funnel-track {
-    height: 32px;
-    background: var(--border);
-    border-radius: 6px;
-    overflow: hidden;
-  }
-  .funnel-fill {
-    height: 100%;
-    border-radius: 6px;
-    transition: width 1.4s cubic-bezier(.16,1,.3,1);
-    width: 0;
-    display: flex;
-    align-items: center;
-    padding-left: 10px;
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    color: #000;
-    font-weight: 500;
-  }
-
-  /* ── Animations ── */
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(16px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  /* ── Division Pills ── */
-  .div-pills {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 24px;
-    animation: fadeUp .6s .1s ease both;
-  }
-
-  .div-pill {
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    letter-spacing: .06em;
-    text-transform: uppercase;
-    padding: 6px 14px;
-    border-radius: 99px;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    cursor: pointer;
-    transition: all .2s;
-  }
-
-  .div-pill.active, .div-pill:hover {
-    border-color: var(--pill-color);
-    color: var(--pill-color);
-    background: color-mix(in srgb, var(--pill-color) 10%, transparent);
-  }
-
 </style>
 </head>
 <body>
-<div class="wrapper">
 
-  <!-- Header -->
-  <header>
+<div id="loader">
+  <div class="logo">MILLERS PROS GROUP</div>
+  <div class="sub">Loading Sales Intelligence</div>
+  <div class="spinner"></div>
+</div>
+
+<header>
+  <div class="brand">
+    <div class="brand-mark">
+      <svg viewBox="0 0 20 20"><path d="M10 2L2 7v6l8 5 8-5V7L10 2zm0 2.5L16 8l-6 3.75L4 8l6-3.5zM3.5 9.2l6 3.75v5.55L3.5 14.75V9.2zm7.5 9.3v-5.55l6-3.75v5.55L11 18.5z"/></svg>
+    </div>
     <div>
-      <div class="brand-tag">Millers Pros Group · Sales Intelligence</div>
-      <h1>Sales <span>Scorecard</span><br>2026</h1>
-    </div>
-    <div class="header-meta">
-      <div>Goals vs Actuals</div>
-      <div>YTD: Jan–Feb 2026</div>
-      <div>6 Divisions Tracked</div>
-    </div>
-  </header>
-
-  <!-- Tabs -->
-  <div class="tabs">
-    <button class="tab" onclick="switchTab(&#39;overview&#39;)">Overview</button>
-    <button class="tab" onclick="switchTab(&#39;scorecard&#39;)">Scorecard</button>
-    <button class="tab active" onclick="switchTab(&#39;monthly&#39;)">Goals vs Sales</button>
-    <button class="tab" onclick="switchTab(&#39;leads&#39;)">Lead Projections</button>
-  </div>
-
-  <!-- ══════════════ TAB: OVERVIEW ══════════════ -->
-  <div id="tab-overview" class="tab-content">
-
-    <!-- KPIs -->
-    <div class="kpi-row">
-      <div class="kpi" style="--kpi-color: var(--accent)">
-        <div class="kpi-label">Total Annual Goal ($)</div>
-        <div class="kpi-value">$65.4M</div>
-        <div class="kpi-sub">Across all 6 divisions</div>
-        <div class="kpi-badge badge-yellow">Full Year</div>
-      </div>
-      <div class="kpi" style="--kpi-color: var(--accent2)">
-        <div class="kpi-label">Total Deals Goal</div>
-        <div class="kpi-value">330</div>
-        <div class="kpi-sub">Annual units planned</div>
-        <div class="kpi-badge badge-yellow">All Divisions</div>
-      </div>
-      <div class="kpi" style="--kpi-color: var(--green)">
-        <div class="kpi-label">Actual Deals (YTD)</div>
-        <div class="kpi-value">11</div>
-        <div class="kpi-sub">Jan–Feb closed</div>
-        <div class="kpi-badge badge-green">+11 Units</div>
-      </div>
-      <div class="kpi" style="--kpi-color: var(--accent3)">
-        <div class="kpi-label">YTD Revenue</div>
-        <div class="kpi-value">$1.59M</div>
-        <div class="kpi-sub">All divisions combined</div>
-        <div class="kpi-badge badge-red">2.4% of goal</div>
-      </div>
-      <div class="kpi" style="--kpi-color: var(--accent4)">
-        <div class="kpi-label">Lead Pipeline (Ann.)</div>
-        <div class="kpi-value">1,820</div>
-        <div class="kpi-sub">Total projected leads</div>
-        <div class="kpi-badge badge-yellow">6 Div.</div>
-      </div>
-      <div class="kpi" style="--kpi-color: var(--accent2)">
-        <div class="kpi-label">Best Performer</div>
-        <div class="kpi-value">MP Maint</div>
-        <div class="kpi-sub">Feb: 500% of goal (5 vs 1)</div>
-        <div class="kpi-badge badge-green">🔥 Crushing It</div>
-      </div>
-    </div>
-
-    <!-- Goal $$ by Division + Deals Progress -->
-    <div class="grid-2">
-      <div class="card">
-        <div class="card-title"><span class="dot" style="--dot-color:#e8ff47"></span>Annual Revenue Goal by Division</div>
-        <div class="chart-wrap">
-          <canvas id="chartGoalDiv" width="640" height="220" style="display: block; box-sizing: border-box; height: 220px; width: 640px;"></canvas>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-title"><span class="dot" style="--dot-color:#47c4ff"></span>Deal Goals vs Actuals (YTD)</div>
-        <div class="progress-list" id="dealProgress">
-    <div class="progress-item">
-      <div class="progress-header">
-        <span class="progress-name">MP Construction</span>
-        <span class="progress-nums">2 / 100 units (2%)</span>
-      </div>
-      <div class="progress-track">
-        <div class="progress-fill" style="--fill-color: #e8ff47; width: 2%;"></div>
-      </div>
-    </div>
-    <div class="progress-item">
-      <div class="progress-header">
-        <span class="progress-name">MP Maintenance</span>
-        <span class="progress-nums">6 / 60 units (10%)</span>
-      </div>
-      <div class="progress-track">
-        <div class="progress-fill" style="--fill-color: #47c4ff; width: 10%;"></div>
-      </div>
-    </div>
-    <div class="progress-item">
-      <div class="progress-header">
-        <span class="progress-name">MPL Construction</span>
-        <span class="progress-nums">2 / 26 units (8%)</span>
-      </div>
-      <div class="progress-track">
-        <div class="progress-fill" style="--fill-color: #ff6b47; width: 8%;"></div>
-      </div>
-    </div>
-    <div class="progress-item">
-      <div class="progress-header">
-        <span class="progress-name">MPL Maintenance</span>
-        <span class="progress-nums">0 / 75 units (0%)</span>
-      </div>
-      <div class="progress-track">
-        <div class="progress-fill" style="--fill-color: #4ade80; width: 0%;"></div>
-      </div>
-    </div>
-    <div class="progress-item">
-      <div class="progress-header">
-        <span class="progress-name">RNS</span>
-        <span class="progress-nums">1 / 60 units (2%)</span>
-      </div>
-      <div class="progress-track">
-        <div class="progress-fill" style="--fill-color: #a78bfa; width: 2%;"></div>
-      </div>
-    </div>
-    <div class="progress-item">
-      <div class="progress-header">
-        <span class="progress-name">MPC</span>
-        <span class="progress-nums">1 / 10 units (10%)</span>
-      </div>
-      <div class="progress-track">
-        <div class="progress-fill" style="--fill-color: #f472b6; width: 10%;"></div>
-      </div>
-    </div></div>
-      </div>
-    </div>
-
-    <!-- Monthly Revenue Goal (MP Construction) + Funnel -->
-    <div class="grid-2">
-      <div class="card">
-        <div class="card-title"><span class="dot" style="--dot-color:#ff6b47"></span>MP Construction — Monthly Deal Goals</div>
-        <div class="chart-wrap">
-          <canvas id="chartMPCMonthly" width="640" height="220" style="display: block; box-sizing: border-box; height: 220px; width: 640px;"></canvas>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-title"><span class="dot" style="--dot-color:#a78bfa"></span>Lead Funnel — Annual Projections</div>
-        <div class="funnel" id="funnelAll">
-    <div class="funnel-step">
-      <div class="funnel-label">Total Leads</div>
-      <div class="funnel-bar-wrap">
-        <div class="funnel-track">
-          <div class="funnel-fill" style="background: rgb(232, 255, 71); width: 100%;">1,820</div>
-        </div>
-      </div>
-      <div class="funnel-num" style="color:#e8ff47">100%</div>
-    </div>
-    <div class="funnel-step">
-      <div class="funnel-label">Total Visits</div>
-      <div class="funnel-bar-wrap">
-        <div class="funnel-track">
-          <div class="funnel-fill" style="background: rgb(71, 196, 255); width: 71%;">1,300</div>
-        </div>
-      </div>
-      <div class="funnel-num" style="color:#47c4ff">71%</div>
-    </div>
-    <div class="funnel-step">
-      <div class="funnel-label">Total Deals</div>
-      <div class="funnel-bar-wrap">
-        <div class="funnel-track">
-          <div class="funnel-fill" style="background: rgb(74, 222, 128); width: 18%;">330</div>
-        </div>
-      </div>
-      <div class="funnel-num" style="color:#4ade80">18%</div>
-    </div></div>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- ══════════════ TAB: SCORECARD ══════════════ -->
-  <div id="tab-scorecard" class="tab-content">
-
-    <!-- Division selector -->
-    <div class="div-pills">
-      <div class="div-pill active" style="--pill-color:#e8ff47" onclick="showDivision(&#39;mpc&#39;)">MP Construction</div>
-      <div class="div-pill" style="--pill-color:#47c4ff" onclick="showDivision(&#39;mps&#39;)">MP Maintenance</div>
-      <div class="div-pill" style="--pill-color:#ff6b47" onclick="showDivision(&#39;mplc&#39;)">MPL Construction</div>
-      <div class="div-pill" style="--pill-color:#4ade80" onclick="showDivision(&#39;mplm&#39;)">MPL Maintenance</div>
-      <div class="div-pill" style="--pill-color:#a78bfa" onclick="showDivision(&#39;rns&#39;)">RNS</div>
-      <div class="div-pill" style="--pill-color:#f472b6" onclick="showDivision(&#39;mpcorp&#39;)">MPC</div>
-    </div>
-
-    <!-- Dynamic scorecard table -->
-    <div class="card" id="scorecardCard">
-      <div class="card-title" id="scorecardTitle"><span class="dot" style="background:#e8ff47"></span>MP Construction — Goals vs Actuals</div>
-      <div style="overflow-x:auto">
-        <table class="data-table" id="scorecardTable"><thead><tr>
-    <th>Month</th><th>Goal (Units)</th><th>Goal ($)</th>
-    <th>Actual</th><th>Variance</th><th>% to Goal</th>
-  </tr></thead><tbody><tr>
-      <td>Jan</td>
-      <td>1</td>
-      <td>$97,500</td>
-      <td>0</td>
-      <td class="num-negative">-1</td>
-      <td>0%</td>
-    </tr><tr>
-      <td>Feb</td>
-      <td>2</td>
-      <td>$195,000</td>
-      <td>2</td>
-      <td class="num-positive">+0</td>
-      <td>100%</td>
-    </tr><tr>
-      <td>Mar</td>
-      <td>7</td>
-      <td>$682,500</td>
-      <td>—</td>
-      <td class="num-neutral">—</td>
-      <td>—</td>
-    </tr><tr>
-      <td>Apr</td>
-      <td>15</td>
-      <td>$1,462,500</td>
-      <td>—</td>
-      <td class="num-neutral">—</td>
-      <td>—</td>
-    </tr><tr>
-      <td>May</td>
-      <td>5</td>
-      <td>$487,500</td>
-      <td>—</td>
-      <td class="num-neutral">—</td>
-      <td>—</td>
-    </tr><tr>
-      <td>Jun</td>
-      <td>10</td>
-      <td>$975,000</td>
-      <td>—</td>
-      <td class="num-neutral">—</td>
-      <td>—</td>
-    </tr><tr>
-      <td>Jul</td>
-      <td>12</td>
-      <td>$1,170,000</td>
-      <td>—</td>
-      <td class="num-neutral">—</td>
-      <td>—</td>
-    </tr><tr>
-      <td>Aug</td>
-      <td>12</td>
-      <td>$1,170,000</td>
-      <td>—</td>
-      <td class="num-neutral">—</td>
-      <td>—</td>
-    </tr><tr>
-      <td>Sep</td>
-      <td>14</td>
-      <td>$1,365,000</td>
-      <td>—</td>
-      <td class="num-neutral">—</td>
-      <td>—</td>
-    </tr><tr>
-      <td>Oct</td>
-      <td>9</td>
-      <td>$877,500</td>
-      <td>—</td>
-      <td class="num-neutral">—</td>
-      <td>—</td>
-    </tr><tr>
-      <td>Nov</td>
-      <td>10</td>
-      <td>$975,000</td>
-      <td>—</td>
-      <td class="num-neutral">—</td>
-      <td>—</td>
-    </tr><tr>
-      <td>Dec</td>
-      <td>3</td>
-      <td>$292,500</td>
-      <td>—</td>
-      <td class="num-neutral">—</td>
-      <td>—</td>
-    </tr><tr class="total-row">
-    <td>TOTAL</td><td>100</td>
-    <td>$9,750,000</td>
-    <td>2</td>
-    <td>—</td><td>—</td>
-  </tr></tbody></table>
-      </div>
-    </div>
-
-    <div class="grid-2" style="margin-top:20px; animation: fadeUp .5s ease both;">
-      <div class="card">
-        <div class="card-title"><span class="dot"></span>Monthly Deal Goals</div>
-        <div class="chart-wrap"><canvas id="chartScorecardDeals" height="0" style="display: block; box-sizing: border-box; height: 0px; width: 0px;" width="0"></canvas></div>
-      </div>
-      <div class="card">
-        <div class="card-title"><span class="dot"></span>Monthly Revenue Goals ($)</div>
-        <div class="chart-wrap"><canvas id="chartScorecardRevenue" height="0" style="display: block; box-sizing: border-box; height: 0px; width: 0px;" width="0"></canvas></div>
-      </div>
+      <div class="brand-name">MILLERS PROS GROUP</div>
+      <div class="brand-sub">Sales Intelligence · 2026</div>
     </div>
   </div>
+  <div class="header-right">
+    <span class="last-updated" id="last-updated">Loading...</span>
+    <button class="refresh-btn" onclick="loadData()">↻ Refresh</button>
+  </div>
+</header>
 
+<div class="nav-tabs">
+  <button class="tab-btn active" onclick="showTab('overview')">Overview</button>
+  <button class="tab-btn" onclick="showTab('scorecard')">Scorecard</button>
+  <button class="tab-btn" onclick="showTab('charts')">Charts</button>
+</div>
 
-  <!-- TAB: MONTHLY GOALS VS SALES -->
-  <div id="tab-monthly" class="tab-content active">
+<main>
 
-    <div class="div-pills" id="monthlyPills">
-      <div class="div-pill" style="--pill-color:#e8ff47" onclick="setMonthlyDiv(&#39;mpc&#39;)">MP Construction</div>
-      <div class="div-pill" style="--pill-color:#47c4ff" onclick="setMonthlyDiv(&#39;mps&#39;)">MP Maintenance</div>
-      <div class="div-pill" style="--pill-color:#ff6b47" onclick="setMonthlyDiv(&#39;mplc&#39;)">MPL Construction</div>
-      <div class="div-pill" style="--pill-color:#4ade80" onclick="setMonthlyDiv(&#39;mplm&#39;)">MPL Maintenance</div>
-      <div class="div-pill" style="--pill-color:#a78bfa" onclick="setMonthlyDiv(&#39;rns&#39;)">RNS</div>
-      <div class="div-pill active" style="--pill-color:#f472b6" onclick="setMonthlyDiv(&#39;mpcorp&#39;)">MPC</div>
-    </div>
+  <!-- OVERVIEW TAB -->
+  <div class="tab-panel active" id="tab-overview">
+    <div class="section-title">YTD Performance Summary</div>
+    <div class="kpi-grid" id="kpi-grid"></div>
 
-    <div class="kpi-row" id="monthlyKpis" style="animation:none">
-    <div class="kpi" style="--kpi-color:#f472b6">
-      <div class="kpi-label">Annual Goal (Units)</div>
-      <div class="kpi-value">10</div>
-      <div class="kpi-sub">Full year target</div>
-    </div>
-    <div class="kpi" style="--kpi-color:#f472b6">
-      <div class="kpi-label">YTD Actual (Units)</div>
-      <div class="kpi-value">1</div>
-      <div class="kpi-sub">1 month(s) of data</div>
-      <div class="kpi-badge badge-green">+1 vs period goal</div>
-    </div>
-    <div class="kpi" style="--kpi-color:#f472b6">
-      <div class="kpi-label">YTD % to Goal</div>
-      <div class="kpi-value">0%</div>
-      <div class="kpi-sub">vs 0 unit period goal</div>
-    </div>
-    <div class="kpi" style="--kpi-color:#f472b6">
-      <div class="kpi-label">Annual Revenue Goal</div>
-      <div class="kpi-value">$50.0M</div>
-      <div class="kpi-sub">Full year target</div>
-    </div></div>
-
-    <div class="card" style="margin-bottom:20px">
-      <div class="card-title" id="monthlyUnitsTitle"><span class="dot" style="background:#f472b6"></span>MPC — Monthly Deal Goals vs Actuals (Units)</div>
-      <div class="chart-wrap" style="height:280px"><canvas id="chartMonthlyUnits" style="box-sizing: border-box; display: block; height: 280px; width: 1350px;" width="1350" height="280"></canvas></div>
-    </div>
-
-    <div class="card" style="margin-bottom:20px">
-      <div class="card-title" id="monthlyRevenueTitle"><span class="dot" style="background:#47c4ff"></span>MPC — Monthly Revenue Goals vs Actuals ($)</div>
-      <div class="chart-wrap" style="height:280px"><canvas id="chartMonthlyRevenue" style="box-sizing: border-box; display: block; height: 280px; width: 1350px;" width="1350" height="280"></canvas></div>
-    </div>
-
-    <div class="grid-2">
-      <div class="card">
-        <div class="card-title"><span class="dot" style="--dot-color:#ff6b47"></span>Monthly Variance (Units: Actual − Goal)</div>
-        <div class="chart-wrap"><canvas id="chartMonthlyVariance" style="box-sizing: border-box; display: block; height: 220px; width: 640px;" width="640" height="220"></canvas></div>
-      </div>
-      <div class="card">
-        <div class="card-title"><span class="dot" style="--dot-color:#4ade80"></span>% of Goal Achieved by Month</div>
-        <div class="chart-wrap"><canvas id="chartMonthlyPct" style="box-sizing: border-box; display: block; height: 220px; width: 640px;" width="640" height="220"></canvas></div>
-      </div>
-    </div>
-
-    <div class="card" style="margin-top:20px">
-      <div class="card-title" id="monthlyTableTitle"><span class="dot" style="background:#f472b6"></span>MPC — Full Monthly Breakdown</div>
-      <div style="overflow-x:auto">
-        <table class="data-table" id="monthlyTable"><thead><tr>
-    <th>Month</th><th>Goal (Units)</th><th>Actual (Units)</th><th>Variance</th><th>% to Goal</th>
-    <th>Goal ($)</th><th>Actual Est. ($)</th><th>Revenue Variance</th>
-  </tr></thead><tbody><tr>
-      <td>Jan</td>
-      <td>0</td>
-      <td><span class="num-neutral">—</span></td>
-      <td class="num-neutral"><span class="num-neutral">—</span></td>
-      <td class="num-neutral">—</td>
-      <td>$0</td>
-      <td>$0</td>
-      <td class="num-positive">+$0</td>
-    </tr><tr>
-      <td>Feb</td>
-      <td>1</td>
-      <td>1</td>
-      <td class="num-positive">+0</td>
-      <td class="num-positive">100%</td>
-      <td>$5,000,000</td>
-      <td>$1,100,000</td>
-      <td class="num-negative">$3,900,000</td>
-    </tr><tr>
-      <td>Mar</td>
-      <td>1</td>
-      <td><span class="num-neutral">—</span></td>
-      <td class="num-neutral"><span class="num-neutral">—</span></td>
-      <td class="num-neutral">—</td>
-      <td>$5,000,000</td>
-      <td><span class="num-neutral">—</span></td>
-      <td class="num-neutral">—</td>
-    </tr><tr>
-      <td>Apr</td>
-      <td>1</td>
-      <td><span class="num-neutral">—</span></td>
-      <td class="num-neutral"><span class="num-neutral">—</span></td>
-      <td class="num-neutral">—</td>
-      <td>$5,000,000</td>
-      <td><span class="num-neutral">—</span></td>
-      <td class="num-neutral">—</td>
-    </tr><tr>
-      <td>May</td>
-      <td>2</td>
-      <td><span class="num-neutral">—</span></td>
-      <td class="num-neutral"><span class="num-neutral">—</span></td>
-      <td class="num-neutral">—</td>
-      <td>$10,000,000</td>
-      <td><span class="num-neutral">—</span></td>
-      <td class="num-neutral">—</td>
-    </tr><tr>
-      <td>Jun</td>
-      <td>2</td>
-      <td><span class="num-neutral">—</span></td>
-      <td class="num-neutral"><span class="num-neutral">—</span></td>
-      <td class="num-neutral">—</td>
-      <td>$10,000,000</td>
-      <td><span class="num-neutral">—</span></td>
-      <td class="num-neutral">—</td>
-    </tr><tr>
-      <td>Jul</td>
-      <td>1</td>
-      <td><span class="num-neutral">—</span></td>
-      <td class="num-neutral"><span class="num-neutral">—</span></td>
-      <td class="num-neutral">—</td>
-      <td>$5,000,000</td>
-      <td><span class="num-neutral">—</span></td>
-      <td class="num-neutral">—</td>
-    </tr><tr>
-      <td>Aug</td>
-      <td>1</td>
-      <td><span class="num-neutral">—</span></td>
-      <td class="num-neutral"><span class="num-neutral">—</span></td>
-      <td class="num-neutral">—</td>
-      <td>$5,000,000</td>
-      <td><span class="num-neutral">—</span></td>
-      <td class="num-neutral">—</td>
-    </tr><tr>
-      <td>Sep</td>
-      <td>1</td>
-      <td><span class="num-neutral">—</span></td>
-      <td class="num-neutral"><span class="num-neutral">—</span></td>
-      <td class="num-neutral">—</td>
-      <td>$5,000,000</td>
-      <td><span class="num-neutral">—</span></td>
-      <td class="num-neutral">—</td>
-    </tr><tr>
-      <td>Oct</td>
-      <td>0</td>
-      <td><span class="num-neutral">—</span></td>
-      <td class="num-neutral"><span class="num-neutral">—</span></td>
-      <td class="num-neutral">—</td>
-      <td>$0</td>
-      <td><span class="num-neutral">—</span></td>
-      <td class="num-neutral">—</td>
-    </tr><tr>
-      <td>Nov</td>
-      <td>0</td>
-      <td><span class="num-neutral">—</span></td>
-      <td class="num-neutral"><span class="num-neutral">—</span></td>
-      <td class="num-neutral">—</td>
-      <td>$0</td>
-      <td><span class="num-neutral">—</span></td>
-      <td class="num-neutral">—</td>
-    </tr><tr>
-      <td>Dec</td>
-      <td>0</td>
-      <td><span class="num-neutral">—</span></td>
-      <td class="num-neutral"><span class="num-neutral">—</span></td>
-      <td class="num-neutral">—</td>
-      <td>$0</td>
-      <td><span class="num-neutral">—</span></td>
-      <td class="num-neutral">—</td>
-    </tr><tr class="total-row">
-    <td>TOTAL</td><td>10</td><td>1</td>
-    <td>+1</td><td>0%</td>
-    <td>$50,000,000</td>
-    <td>$1,100,000</td>
-    <td>$48,900,000</td>
-  </tr></tbody></table>
-      </div>
-    </div>
-
+    <div class="section-title">Division Breakdown</div>
+    <div class="div-grid" id="div-grid"></div>
   </div>
 
-
-  <!-- ══════════════ TAB: LEAD PROJECTIONS ══════════════ -->
-  <div id="tab-leads" class="tab-content">
-
-    <div class="kpi-row">
-      <div class="kpi" style="--kpi-color:#e8ff47">
-        <div class="kpi-label">MP Construction</div>
-        <div class="kpi-value">700</div>
-        <div class="kpi-sub">Leads · 500 Visits · 100 Deals</div>
-      </div>
-      <div class="kpi" style="--kpi-color:#47c4ff">
-        <div class="kpi-label">MP Maintenance</div>
-        <div class="kpi-value">420</div>
-        <div class="kpi-sub">Leads · 300 Visits · 60 Deals</div>
-      </div>
-      <div class="kpi" style="--kpi-color:#ff6b47">
-        <div class="kpi-label">MPL Construction</div>
-        <div class="kpi-value">175</div>
-        <div class="kpi-sub">Leads · 125 Visits · 25 Deals</div>
-      </div>
-      <div class="kpi" style="--kpi-color:#4ade80">
-        <div class="kpi-label">MPL Maintenance</div>
-        <div class="kpi-value">525</div>
-        <div class="kpi-sub">Leads · 375 Visits · 75 Deals</div>
-      </div>
-    </div>
-
-    <div class="grid-2">
-      <div class="card">
-        <div class="card-title"><span class="dot" style="--dot-color:#e8ff47"></span>Leads by Division (Annual)</div>
-        <div class="chart-wrap"><canvas id="chartLeadsByDiv" height="0" style="display: block; box-sizing: border-box; height: 0px; width: 0px;" width="0"></canvas></div>
-      </div>
-      <div class="card">
-        <div class="card-title"><span class="dot" style="--dot-color:#47c4ff"></span>MP Construction — Monthly Lead Flow</div>
-        <div class="chart-wrap"><canvas id="chartMPCLeads" height="0" style="display: block; box-sizing: border-box; height: 0px; width: 0px;" width="0"></canvas></div>
-      </div>
-    </div>
-
-    <div class="card" style="margin-top:20px">
-      <div class="card-title"><span class="dot" style="--dot-color:#a78bfa"></span>Lead Projections Summary Table</div>
-      <div style="overflow-x:auto">
-        <table class="data-table" id="leadsTable"><thead><tr><th>Division</th><th>Total Deals</th><th>Total Visits</th><th>Total Leads</th><th>Lead→Deal Rate</th></tr></thead><tbody><tr><td>MP Construction</td><td>100</td><td>500</td><td>700</td><td class="num-positive">14.3%</td></tr><tr><td>MP Maintenance</td><td>60</td><td>300</td><td>420</td><td class="num-positive">14.3%</td></tr><tr><td>MPL Construction</td><td>25</td><td>125</td><td>175</td><td class="num-positive">14.3%</td></tr><tr><td>MPL Maintenance</td><td>75</td><td>375</td><td>525</td><td class="num-positive">14.3%</td></tr></tbody></table>
-      </div>
-    </div>
-
+  <!-- SCORECARD TAB -->
+  <div class="tab-panel" id="tab-scorecard">
+    <div class="div-selector" id="score-div-selector"></div>
+    <div class="scorecard-wrap" id="scorecard-table"></div>
   </div>
 
-</div><!-- /wrapper -->
+  <!-- CHARTS TAB -->
+  <div class="tab-panel" id="tab-charts">
+    <div class="div-selector" id="chart-div-selector"></div>
+    <div class="charts-grid" id="charts-grid"></div>
+  </div>
+
+</main>
 
 <script>
-// ═══════════════════ DATA ═══════════════════
-const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTo6J92T-IbwG_HoIgKOG9jf9rH613rs7OdTAQLinGaziV9NrGv_WFdQ7JxVEcEZg/pub?output=csv';
 
-const divisions = {
-  mpc: {
-    name: 'MP Construction',
-    color: '#e8ff47',
-    goalUnits: [1,2,7,15,5,10,12,12,14,9,10,3],
-    goalDollars: [97500,195000,682500,1462500,487500,975000,1170000,1170000,1365000,877500,975000,292500],
-    actualDollars: [0,209100,null,null,null,null,null,null,null,null,null,null],
-    actual: [0,2,null,null,null,null,null,null,null,null,null,null],
-    variance: [-1,0],
-    ytdRevenue: 209100,
-    totalGoalUnits: 100,
-    totalGoalDollars: 9750000,
-  },
-  mps: {
-    name: 'MP Maintenance',
-    color: '#47c4ff',
-    goalUnits: [2,1,5,10,6,6,7,5,7,4,5,2],
-    goalDollars: [10000,5000,25000,50000,30000,30000,35000,25000,35000,20000,25000,10000],
-    actualDollars: [5700,24500,null,null,null,null,null,null,null,null,null,null],
-    actual: [1,5,null,null,null,null,null,null,null,null,null,null],
-    variance: [-1,4],
-    ytdRevenue: 30200,
-    totalGoalUnits: 60,
-    totalGoalDollars: 300000,
-  },
-  mplc: {
-    name: 'MPL Construction',
-    color: '#ff6b47',
-    goalUnits: [1,1,3,3,2,2,2,3,5,3,1,1],
-    goalDollars: [115385,115385,346154,346154,230769,230769,230769,346154,576923,346154,115385,115385],
-    actualDollars: [178890,0,null,null,null,null,null,null,null,null,null,null],
-    actual: [2,0,null,null,null,null,null,null,null,null,null,null],
-    variance: [1,-1],
-    ytdRevenue: 178890,
-    totalGoalUnits: 26,
-    totalGoalDollars: 3000000,
-  },
-  mplm: {
-    name: 'MPL Maintenance',
-    color: '#4ade80',
-    goalUnits: [1,1,6,10,10,7,7,7,9,8,8,1],
-    goalDollars: [15000,15000,90000,150000,150000,105000,105000,105000,135000,120000,120000,15000],
-    actualDollars: [null,null,null,null,null,null,null,null,null,null,null,null],
-    actual: [null,null,null,null,null,null,null,null,null,null,null,null],
-    variance: [],
-    ytdRevenue: 0,
-    totalGoalUnits: 75,
-    totalGoalDollars: 1125000,
-  },
-  rns: {
-    name: 'RNS',
-    color: '#a78bfa',
-    goalUnits: [4,4,4,4,6,6,6,6,7,4,6,3],
-    goalDollars: [80000,80000,80000,80000,120000,120000,120000,120000,140000,80000,120000,60000],
-    actualDollars: [74966,null,null,null,null,null,null,null,null,null,null,null],
-    actual: [1,null,null,null,null,null,null,null,null,null,null,null],
-    variance: [-3],
-    ytdRevenue: 74966,
-    totalGoalUnits: 60,
-    totalGoalDollars: 1200000,
-  },
-  mpcorp: {
-    name: 'MPC',
-    color: '#f472b6',
-    goalUnits: [0,1,1,1,2,2,1,1,1,0,0,0],
-    goalDollars: [0,5000000,5000000,5000000,10000000,10000000,5000000,5000000,5000000,0,0,0],
-    actualDollars: [0,1100000,null,null,null,null,null,null,null,null,null,null],
-    actual: [null,1,null,null,null,null,null,null,null,null,null,null],
-    variance: [0],
-    ytdRevenue: 1100000,
-    totalGoalUnits: 10,
-    totalGoalDollars: 50000000,
-  }
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+const DIV_COLORS = {
+  'MP Construction': '#e8b94f',
+  'MPL Construction': '#4fc3e8',
+  'MPC': '#3de87a',
+  'MP Maintenance': '#e87a4f',
+  'MPL Maintenance': '#b44fe8',
+  'RNS': '#e84f9a'
 };
 
-const leadData = {
-  mpc: { deals:[1,2,7,15,5,10,12,12,14,9,10,3], visits:[5,10,35,75,25,50,60,60,70,45,50,15], leads:[7,14,49,105,35,70,84,84,98,63,70,21] },
-  mps: { deals:[1,1,5,11,6,6,7,5,7,4,5,2], visits:[5,5,25,55,30,30,35,25,35,20,25,10], leads:[7,7,35,77,42,42,49,35,49,28,35,14] },
-  mplc: { deals:[0,0,3,3,2,2,2,3,5,3,1,1], visits:[0,0,15,15,10,10,10,15,25,15,5,5], leads:[0,0,21,21,14,14,14,21,35,21,7,7] },
-  mplm: { deals:[1,1,6,10,10,7,7,7,9,8,8,1], visits:[5,5,30,50,50,35,35,35,45,40,40,5], leads:[7,7,42,70,70,49,49,49,63,56,56,7] },
-};
+let divisionData = {};
+let activeScoreDiv = '';
+let activeChartDiv = '';
+let chartInstances = {};
 
-// ═══════════════════ CHARTS ═══════════════════
-Chart.defaults.color = '#5a6180';
-Chart.defaults.borderColor = '#1f2433';
-Chart.defaults.font.family = "'DM Mono', monospace";
+function parseNum(s) {
+  if (!s || s === '—' || s === '' || s === '#REF!') return null;
+  return parseFloat(s.replace(/[$,%]/g,'').replace(/,/g,'')) || 0;
+}
 
-const chartColors = ['#e8ff47','#47c4ff','#ff6b47','#4ade80','#a78bfa','#f472b6'];
+function parsePct(s) {
+  if (!s || s === '—' || s === '') return null;
+  return parseFloat(s.replace('%','')) || 0;
+}
 
-// Overview: Goal by Division (bar)
-new Chart(document.getElementById('chartGoalDiv'), {
-  type: 'bar',
-  data: {
-    labels: ['MP Const','MP Maint','MPL Const','MPL Maint','RNS','MPC'],
-    datasets: [{
-      data: [9750000, 300000, 3000000, 1125000, 1200000, 50000000],
-      backgroundColor: chartColors.map(c => c + '22'),
-      borderColor: chartColors,
-      borderWidth: 2,
-      borderRadius: 6,
-    }]
-  },
-  options: {
-    responsive: true, maintainAspectRatio: false,
-    plugins: { legend: { display: false } },
-    scales: {
-      y: { ticks: { callback: v => '$' + (v/1e6).toFixed(1)+'M' }, grid: { color: '#1f2433' } },
-      x: { grid: { display: false } }
+function fmtMoney(n) {
+  if (n === null || n === undefined) return '—';
+  if (Math.abs(n) >= 1e6) return '$' + (n/1e6).toFixed(1) + 'M';
+  if (Math.abs(n) >= 1e3) return '$' + (n/1e3).toFixed(0) + 'K';
+  return '$' + n.toFixed(0);
+}
+
+function fmtNum(n) {
+  if (n === null || n === undefined) return '—';
+  return n % 1 === 0 ? n.toString() : n.toFixed(1);
+}
+
+function parseCSV(text) {
+  const rows = [];
+  const lines = text.split('\n');
+  for (const line of lines) {
+    const row = [];
+    let inQ = false, val = '';
+    for (let i = 0; i < line.length; i++) {
+      const c = line[i];
+      if (c === '"') { inQ = !inQ; continue; }
+      if (c === ',' && !inQ) { row.push(val.trim()); val = ''; }
+      else val += c;
     }
+    row.push(val.trim());
+    rows.push(row);
   }
-});
+  return rows;
+}
 
-// Overview: Deal Progress Bars
-const dealGoals = { 'MP Construction':100,'MP Maintenance':60,'MPL Construction':26,'MPL Maintenance':75,'RNS':60,'MPC':10 };
-const dealActuals = { 'MP Construction':2,'MP Maintenance':6,'MPL Construction':2,'MPL Maintenance':0,'RNS':1,'MPC':1 };
-const container = document.getElementById('dealProgress');
-Object.entries(dealGoals).forEach(([name, goal], i) => {
-  const actual = dealActuals[name];
-  const pct = Math.round((actual/goal)*100);
-  container.innerHTML += `
-    <div class="progress-item">
-      <div class="progress-header">
-        <span class="progress-name">${name}</span>
-        <span class="progress-nums">${actual} / ${goal} units (${pct}%)</span>
-      </div>
-      <div class="progress-track">
-        <div class="progress-fill" style="--fill-color:${chartColors[i]};width:${pct}%"></div>
-      </div>
-    </div>`;
-});
+function extractDivisions(rows) {
+  // Structure: row1=title, row2=div names (cols 1,9,17), row3=headers, rows 4-15=months, row16=TOTAL
+  // Then row17=blank, row18=div names (cols 1,9,17), row19=headers, rows 20-31=months, row32=TOTAL
+  const divs = {};
 
-// Overview: MP Construction monthly deals
-new Chart(document.getElementById('chartMPCMonthly'), {
-  type: 'line',
-  data: {
-    labels: months,
-    datasets: [{
-      label: 'Deal Goal',
-      data: divisions.mpc.goalUnits,
-      borderColor: '#e8ff47',
-      backgroundColor: '#e8ff4715',
-      fill: true,
-      tension: 0.4,
-      pointRadius: 3,
-    }]
-  },
-  options: {
-    responsive: true, maintainAspectRatio: false,
-    plugins: { legend: { display: false } },
-    scales: {
-      y: { grid: { color: '#1f2433' }, ticks: { stepSize: 2 } },
-      x: { grid: { display: false } }
-    }
+  function extractBlock(nameRow, headerRow, dataStartRow, dataEndRow, cols) {
+    const divNames = cols.map(c => (nameRow[c] || '').trim()).filter(Boolean);
+    divNames.forEach((name, di) => {
+      const col = cols[di];
+      divs[name] = { name, months: [], total: null };
+      for (let r = dataStartRow; r <= dataEndRow; r++) {
+        const row = rows[r] || [];
+        const monthLabel = (row[0] || '').trim();
+        if (monthLabel === 'TOTAL') {
+          divs[name].total = {
+            goalU: parseNum(row[col]),
+            goalD: parseNum(row[col+1]),
+            actual: parseNum(row[col+2]),
+            variance: parseNum(row[col+3]),
+            pctGoal: parsePct(row[col+4]),
+            totalAmt: parseNum(row[col+5])
+          };
+        } else if (MONTHS.includes(monthLabel)) {
+          divs[name].months.push({
+            month: monthLabel,
+            goalU: parseNum(row[col]),
+            goalD: parseNum(row[col+1]),
+            actual: parseNum(row[col+2]),
+            variance: parseNum(row[col+3]),
+            pctGoal: parsePct(row[col+4]),
+            totalAmt: parseNum(row[col+5])
+          });
+        }
+      }
+    });
   }
-});
 
-// Overview: Lead Funnel
-const funnelData = [
-  { label: 'Total Leads', value: 1820, color: '#e8ff47' },
-  { label: 'Total Visits', value: 1300, color: '#47c4ff' },
-  { label: 'Total Deals', value: 330, color: '#4ade80' },
-];
-const funnelEl = document.getElementById('funnelAll');
-funnelData.forEach(f => {
-  const pct = Math.round((f.value / funnelData[0].value) * 100);
-  funnelEl.innerHTML += `
-    <div class="funnel-step">
-      <div class="funnel-label">${f.label}</div>
-      <div class="funnel-bar-wrap">
-        <div class="funnel-track">
-          <div class="funnel-fill" style="background:${f.color};width:${pct}%">${f.value.toLocaleString()}</div>
-        </div>
-      </div>
-      <div class="funnel-num" style="color:${f.color}">${pct}%</div>
-    </div>`;
-});
+  // Block 1: rows index 1=div names, 2=col headers, 3..14=months, 15=TOTAL
+  extractBlock(rows[1] || [], rows[2] || [], 3, 15, [1, 9, 17]);
+  // Block 2: rows index 17=div names, 18=col headers, 19..30=months, 31=TOTAL
+  extractBlock(rows[17] || [], rows[18] || [], 19, 31, [1, 9, 17]);
 
-// ═══════════════════ SCORECARD TAB ═══════════════════
-let scorecardDealsChart, scorecardRevenueChart;
+  return divs;
+}
 
-function showDivision(key) {
-  // update pill states
-  document.querySelectorAll('.div-pill').forEach((p,i) => {
-    const keys = ['mpc','mps','mplc','mplm','rns','mpcorp'];
-    p.classList.toggle('active', keys[i] === key);
+function pctClass(pct) {
+  if (pct === null) return 'pct-0';
+  if (pct === 0) return 'pct-0';
+  if (pct < 50) return 'pct-low';
+  if (pct < 100) return 'pct-mid';
+  if (pct < 200) return 'pct-high';
+  return 'pct-fire';
+}
+
+function renderOverview() {
+  const names = Object.keys(divisionData);
+  let totalGoalU = 0, totalActual = 0, totalGoalD = 0, totalAmt = 0;
+  names.forEach(n => {
+    const t = divisionData[n].total;
+    if (!t) return;
+    totalGoalU += t.goalU || 0;
+    totalActual += t.actual || 0;
+    totalGoalD += t.goalD || 0;
+    totalAmt += t.totalAmt || 0;
+  });
+  const ytdPct = totalGoalU ? ((totalActual / totalGoalU)*100).toFixed(1) : 0;
+
+  // Find best performer (by % to goal, YTD)
+  let bestDiv = '', bestPct = -1;
+  names.forEach(n => {
+    const t = divisionData[n].total;
+    if (t && t.pctGoal > bestPct) { bestPct = t.pctGoal; bestDiv = n; }
   });
 
-  const d = divisions[key];
+  document.getElementById('kpi-grid').innerHTML = `
+    <div class="kpi-card">
+      <div class="kpi-label">Total Annual Goal</div>
+      <div class="kpi-value" style="color:var(--accent)">${fmtMoney(totalGoalD)}</div>
+      <div class="kpi-sub">Across ${names.length} divisions</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Total Deal Goal</div>
+      <div class="kpi-value">${fmtNum(totalGoalU)}</div>
+      <div class="kpi-sub">Annual units planned</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Actual Deals YTD</div>
+      <div class="kpi-value" style="color:var(--green)">${fmtNum(totalActual)}</div>
+      <div class="kpi-badge badge-${ytdPct >= 100 ? 'green' : ytdPct >= 50 ? 'yellow' : 'red'}">${ytdPct}% of goal</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">YTD Revenue</div>
+      <div class="kpi-value" style="color:var(--accent2)">${fmtMoney(totalAmt)}</div>
+      <div class="kpi-sub">All divisions combined</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Best Performer</div>
+      <div class="kpi-value" style="color:${DIV_COLORS[bestDiv] || 'var(--accent)'}; font-size:18px">${bestDiv}</div>
+      <div class="kpi-badge badge-green">${bestPct}% to goal</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Divisions Tracked</div>
+      <div class="kpi-value">${names.length}</div>
+      <div class="kpi-sub">Active in 2026</div>
+    </div>
+  `;
 
-  // title
-  document.getElementById('scorecardTitle').innerHTML =
-    `<span class="dot" style="background:${d.color}"></span>${d.name} — Goals vs Actuals`;
+  const divGrid = document.getElementById('div-grid');
+  divGrid.innerHTML = names.map(n => {
+    const d = divisionData[n];
+    const t = d.total || {};
+    const pct = t.pctGoal || 0;
+    const color = DIV_COLORS[n] || '#888';
+    const barW = Math.min(pct, 100);
+    return `
+      <div class="div-card">
+        <div class="div-header">
+          <div class="div-name">
+            <span class="div-color" style="background:${color}"></span>${n}
+          </div>
+          <div class="div-pct" style="color:${color}">${pct || 0}%</div>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" style="width:${barW}%;background:${color}"></div>
+        </div>
+        <div class="div-stats">
+          <div>
+            <div class="div-stat-label">Goal (Units)</div>
+            <div class="div-stat-val">${fmtNum(t.goalU)}</div>
+          </div>
+          <div>
+            <div class="div-stat-label">Actual YTD</div>
+            <div class="div-stat-val" style="color:${color}">${fmtNum(t.actual)}</div>
+          </div>
+          <div>
+            <div class="div-stat-label">Revenue YTD</div>
+            <div class="div-stat-val">${fmtMoney(t.totalAmt)}</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
 
-  // table
-  const tbl = document.getElementById('scorecardTable');
-  let html = `<thead><tr>
-    <th>Month</th><th>Goal (Units)</th><th>Goal ($)</th>
-    <th>Actual</th><th>Variance</th><th>% to Goal</th>
-  </tr></thead><tbody>`;
+function renderDivSelector(containerId, activeDiv, onSelect) {
+  const names = Object.keys(divisionData);
+  document.getElementById(containerId).innerHTML = names.map(n => {
+    const color = DIV_COLORS[n] || '#888';
+    const isActive = n === activeDiv;
+    return `<button class="div-sel-btn ${isActive ? 'active' : ''}"
+      style="${isActive ? `background:${color};color:#0a0c10` : `border-color:${color}33;color:${color}`}"
+      onclick="${onSelect}('${n}')">${n}</button>`;
+  }).join('');
+}
 
-  months.forEach((m, i) => {
-    const g = d.goalUnits[i];
-    const gd = d.goalDollars[i];
-    const a = d.actual[i] !== undefined ? d.actual[i] : null;
-    const v = a !== null ? (a - g) : null;
-    const pct = a !== null ? Math.round((a/g)*100) : null;
-    const vClass = v !== null ? (v >= 0 ? 'num-positive' : 'num-negative') : 'num-neutral';
-    html += `<tr>
-      <td>${m}</td>
-      <td>${g}</td>
-      <td>$${gd.toLocaleString()}</td>
-      <td>${a !== null ? a : '—'}</td>
-      <td class="${vClass}">${v !== null ? (v >= 0 ? '+' : '') + v : '—'}</td>
-      <td>${pct !== null ? pct + '%' : '—'}</td>
+function renderScorecard(divName) {
+  activeScoreDiv = divName;
+  renderDivSelector('score-div-selector', divName, 'renderScorecard');
+  const d = divisionData[divName];
+  if (!d) return;
+  const color = DIV_COLORS[divName] || '#888';
+
+  const rows = d.months.map(m => {
+    const hasActual = m.actual !== null;
+    const pct = m.pctGoal;
+    return `<tr>
+      <td>${m.month}</td>
+      <td class="num">${fmtNum(m.goalU)}</td>
+      <td class="num">${fmtMoney(m.goalD)}</td>
+      <td class="num" style="color:${hasActual ? color : 'var(--muted)'}">${hasActual ? fmtNum(m.actual) : '—'}</td>
+      <td class="num" style="color:${m.variance > 0 ? 'var(--green)' : m.variance < 0 ? 'var(--red)' : 'var(--muted)'}">
+        ${m.variance !== null ? (m.variance > 0 ? '+' : '') + fmtNum(m.variance) : '—'}
+      </td>
+      <td class="pct-cell">
+        ${pct !== null ? `<span class="pct-pill ${pctClass(pct)}">${pct}%</span>` : '<span style="color:var(--muted)">—</span>'}
+      </td>
+      <td class="num">${fmtMoney(m.totalAmt)}</td>
     </tr>`;
   });
 
-  html += `<tr class="total-row">
-    <td>TOTAL</td><td>${d.totalGoalUnits}</td>
-    <td>$${d.totalGoalDollars.toLocaleString()}</td>
-    <td>${d.actual.filter(x=>x!==null).reduce((a,b)=>a+b,0)}</td>
-    <td>—</td><td>—</td>
-  </tr></tbody>`;
-  tbl.innerHTML = html;
+  const t = d.total || {};
+  const totalPct = t.pctGoal;
 
-  // charts
-  if (scorecardDealsChart) scorecardDealsChart.destroy();
-  if (scorecardRevenueChart) scorecardRevenueChart.destroy();
+  document.getElementById('scorecard-table').innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>Month</th>
+          <th style="text-align:right">Goal (Units)</th>
+          <th style="text-align:right">Goal ($)</th>
+          <th style="text-align:right">Actual</th>
+          <th style="text-align:right">Variance</th>
+          <th style="text-align:right">% to Goal</th>
+          <th style="text-align:right">Revenue YTD</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows.join('')}
+        <tr class="total-row">
+          <td>TOTAL</td>
+          <td class="num">${fmtNum(t.goalU)}</td>
+          <td class="num">${fmtMoney(t.goalD)}</td>
+          <td class="num" style="color:${color}">${fmtNum(t.actual)}</td>
+          <td class="num" style="color:${t.variance > 0 ? 'var(--green)' : 'var(--red)'}">
+            ${t.variance !== null ? (t.variance > 0 ? '+' : '') + fmtNum(t.variance) : '—'}
+          </td>
+          <td class="pct-cell">
+            ${totalPct !== null ? `<span class="pct-pill ${pctClass(totalPct)}">${totalPct}%</span>` : '—'}
+          </td>
+          <td class="num">${fmtMoney(t.totalAmt)}</td>
+        </tr>
+      </tbody>
+    </table>
+  `;
+}
 
-  scorecardDealsChart = new Chart(document.getElementById('chartScorecardDeals'), {
+function renderCharts(divName) {
+  activeChartDiv = divName;
+  renderDivSelector('chart-div-selector', divName, 'renderCharts');
+  const d = divisionData[divName];
+  if (!d) return;
+  const color = DIV_COLORS[divName] || '#888';
+  const months = d.months.map(m => m.month);
+
+  // Destroy old charts
+  Object.values(chartInstances).forEach(c => c.destroy());
+  chartInstances = {};
+
+  document.getElementById('charts-grid').innerHTML = `
+    <div class="chart-card">
+      <div class="chart-title">Monthly Deal Goals vs Actuals</div>
+      <div class="chart-wrap"><canvas id="chart-deals"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Monthly Revenue Goals vs Actuals</div>
+      <div class="chart-wrap"><canvas id="chart-revenue"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">% to Goal by Month</div>
+      <div class="chart-wrap"><canvas id="chart-pct"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Variance (Actual − Goal)</div>
+      <div class="chart-wrap"><canvas id="chart-variance"></canvas></div>
+    </div>
+  `;
+
+  const chartDefaults = {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { labels: { color: '#6b7491', font: { family: 'Barlow', size: 11 } } } },
+    scales: {
+      x: { ticks: { color: '#6b7491', font: { family: 'Barlow' } }, grid: { color: '#1e2330' } },
+      y: { ticks: { color: '#6b7491', font: { family: 'Barlow' } }, grid: { color: '#1e2330' } }
+    }
+  };
+
+  // Deals chart
+  chartInstances.deals = new Chart(document.getElementById('chart-deals'), {
     type: 'bar',
     data: {
       labels: months,
-      datasets: [{
-        label: 'Deal Goal',
-        data: d.goalUnits,
-        backgroundColor: d.color + '33',
-        borderColor: d.color,
-        borderWidth: 2,
-        borderRadius: 4,
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: { y: { grid: { color: '#1f2433' } }, x: { grid: { display:false } } }
-    }
-  });
-
-  scorecardRevenueChart = new Chart(document.getElementById('chartScorecardRevenue'), {
-    type: 'bar',
-    data: {
-      labels: months,
-      datasets: [{
-        label: 'Revenue Goal',
-        data: d.goalDollars,
-        backgroundColor: d.color + '33',
-        borderColor: d.color,
-        borderWidth: 2,
-        borderRadius: 4,
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        y: { ticks: { callback: v => '$'+(v/1000).toFixed(0)+'K' }, grid: { color: '#1f2433' } },
-        x: { grid: { display:false } }
-      }
-    }
-  });
-}
-
-// init scorecard
-showDivision('mpc');
-
-// ═══════════════════ LEADS TAB ═══════════════════
-new Chart(document.getElementById('chartLeadsByDiv'), {
-  type: 'doughnut',
-  data: {
-    labels: ['MP Construction','MP Maintenance','MPL Construction','MPL Maintenance','RNS','MPC'],
-    datasets: [{
-      data: [700, 420, 175, 525, null, null],
-      backgroundColor: chartColors.map(c => c + 'bb'),
-      borderColor: '#0a0c10',
-      borderWidth: 3,
-    }]
-  },
-  options: {
-    responsive: true, maintainAspectRatio: false,
-    plugins: {
-      legend: { position: 'right', labels: { font: { size: 11 }, color: '#5a6180', boxWidth: 12 } }
-    }
-  }
-});
-
-new Chart(document.getElementById('chartMPCLeads'), {
-  type: 'line',
-  data: {
-    labels: months,
-    datasets: [
-      { label: 'Leads', data: leadData.mpc.leads, borderColor: '#e8ff47', backgroundColor: '#e8ff4710', fill: true, tension: 0.4 },
-      { label: 'Visits', data: leadData.mpc.visits, borderColor: '#47c4ff', backgroundColor: 'transparent', tension: 0.4 },
-      { label: 'Deals', data: leadData.mpc.deals, borderColor: '#4ade80', backgroundColor: 'transparent', tension: 0.4 },
-    ]
-  },
-  options: {
-    responsive: true, maintainAspectRatio: false,
-    plugins: { legend: { labels: { font: { size: 11 }, color: '#5a6180', boxWidth: 12 } } },
-    scales: { y: { grid: { color: '#1f2433' } }, x: { grid: { display:false } } }
-  }
-});
-
-// Leads summary table
-const leadsDiv = ['MP Construction','MP Maintenance','MPL Construction','MPL Maintenance'];
-const leadsTotals = [
-  [100,500,700],[60,300,420],[25,125,175],[75,375,525]
-];
-let lhtml = `<thead><tr><th>Division</th><th>Total Deals</th><th>Total Visits</th><th>Total Leads</th><th>Lead→Deal Rate</th></tr></thead><tbody>`;
-leadsDiv.forEach((name,i) => {
-  const [d,v,l] = leadsTotals[i];
-  const rate = ((d/l)*100).toFixed(1);
-  lhtml += `<tr><td>${name}</td><td>${d}</td><td>${v}</td><td>${l}</td><td class="num-positive">${rate}%</td></tr>`;
-});
-lhtml += '</tbody>';
-document.getElementById('leadsTable').innerHTML = lhtml;
-
-// ═══════════════════ TAB SWITCHING ═══════════════════
-// ═══════════════════ MONTHLY GOALS VS SALES ═══════════════════
-let monthlyUnitsChart, monthlyRevenueChart, monthlyVarianceChart, monthlyPctChart;
-let currentMonthlyDiv = 'mpc';
-
-function setMonthlyDiv(key) {
-  currentMonthlyDiv = key;
-  document.querySelectorAll('#monthlyPills .div-pill').forEach((p, i) => {
-    const keys = ['mpc','mps','mplc','mplm','rns','mpcorp'];
-    p.classList.toggle('active', keys[i] === key);
-  });
-  renderMonthly(key);
-}
-
-function renderMonthly(key) {
-  const d = divisions[key];
-  const months12 = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-
-  // Build actual arrays (fill nulls with 0 for display, keep null for "no data" logic)
-  const actualUnits = months12.map((_, i) => {
-    const v = d.actual[i];
-    return (v !== undefined && v !== null) ? v : null;
-  });
-  const actualRevenue = months12.map((_, i) => {
-    // Use real actualDollars if available, otherwise estimate from units
-    if (d.actualDollars && d.actualDollars[i] !== undefined && d.actualDollars[i] !== null) {
-      return d.actualDollars[i];
-    }
-    const a = d.actual[i];
-    if (a === undefined || a === null) return null;
-    const g = d.goalUnits[i];
-    if (!g) return 0;
-    return Math.round((a / g) * d.goalDollars[i]);
-  });
-
-  // KPIs
-  const totalActual = actualUnits.filter(v => v !== null).reduce((a,b) => a+b, 0);
-  const totalGoal = d.totalGoalUnits;
-  const pctAchieved = totalGoal > 0 ? Math.round((totalActual/totalGoal)*100) : 0;
-  const monthsTracked = actualUnits.filter(v => v !== null).length;
-  const ytdGoal = d.goalUnits.slice(0, monthsTracked).reduce((a,b) => a+b, 0);
-  const ytdPct = ytdGoal > 0 ? Math.round((totalActual/ytdGoal)*100) : 0;
-  const variance = totalActual - ytdGoal;
-
-  document.getElementById('monthlyKpis').innerHTML = `
-    <div class="kpi" style="--kpi-color:${d.color}">
-      <div class="kpi-label">Annual Goal (Units)</div>
-      <div class="kpi-value">${totalGoal}</div>
-      <div class="kpi-sub">Full year target</div>
-    </div>
-    <div class="kpi" style="--kpi-color:${d.color}">
-      <div class="kpi-label">YTD Actual (Units)</div>
-      <div class="kpi-value">${totalActual}</div>
-      <div class="kpi-sub">${monthsTracked} month(s) of data</div>
-      <div class="kpi-badge ${variance >= 0 ? 'badge-green' : 'badge-red'}">${variance >= 0 ? '+' : ''}${variance} vs period goal</div>
-    </div>
-    <div class="kpi" style="--kpi-color:${d.color}">
-      <div class="kpi-label">YTD % to Goal</div>
-      <div class="kpi-value">${ytdPct}%</div>
-      <div class="kpi-sub">vs ${ytdGoal} unit period goal</div>
-    </div>
-    <div class="kpi" style="--kpi-color:${d.color}">
-      <div class="kpi-label">Annual Revenue Goal</div>
-      <div class="kpi-value">$${(d.totalGoalDollars/1e6).toFixed(1)}M</div>
-      <div class="kpi-sub">Full year target</div>
-    </div>`;
-
-  document.getElementById('monthlyUnitsTitle').innerHTML =
-    `<span class="dot" style="background:${d.color}"></span>${d.name} — Monthly Deal Goals vs Actuals (Units)`;
-  document.getElementById('monthlyRevenueTitle').innerHTML =
-    `<span class="dot" style="background:#47c4ff"></span>${d.name} — Monthly Revenue Goals vs Actuals ($)`;
-  document.getElementById('monthlyTableTitle').innerHTML =
-    `<span class="dot" style="background:${d.color}"></span>${d.name} — Full Monthly Breakdown`;
-
-  // Chart colors
-  const goalColor = d.color;
-  const actualColor = '#47c4ff';
-
-  if (monthlyUnitsChart) monthlyUnitsChart.destroy();
-  monthlyUnitsChart = new Chart(document.getElementById('chartMonthlyUnits'), {
-    type: 'bar',
-    data: {
-      labels: months12,
       datasets: [
         {
-          label: 'Goal (Units)',
-          data: d.goalUnits,
-          backgroundColor: goalColor + '33',
-          borderColor: goalColor,
-          borderWidth: 2,
-          borderRadius: 4,
+          label: 'Goal',
+          data: d.months.map(m => m.goalU),
+          backgroundColor: 'rgba(107,116,145,0.3)',
+          borderColor: '#6b7491', borderWidth: 1, borderRadius: 3
         },
         {
-          label: 'Actual (Units)',
-          data: actualUnits,
-          backgroundColor: actualColor + '88',
-          borderColor: actualColor,
-          borderWidth: 2,
-          borderRadius: 4,
+          label: 'Actual',
+          data: d.months.map(m => m.actual),
+          backgroundColor: color + '99',
+          borderColor: color, borderWidth: 1, borderRadius: 3
         }
       ]
     },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend: { labels: { color: '#5a6180', font: { size: 12 }, boxWidth: 14 } },
-        tooltip: {
-          callbacks: {
-            label: ctx => ctx.raw !== null ? `${ctx.dataset.label}: ${ctx.raw}` : `${ctx.dataset.label}: No data`
-          }
-        }
-      },
-      scales: {
-        y: { grid: { color: '#1f2433' }, ticks: { color: '#5a6180' }, beginAtZero: true },
-        x: { grid: { display: false }, ticks: { color: '#5a6180' } }
-      }
-    }
+    options: { ...chartDefaults }
   });
 
-  if (monthlyRevenueChart) monthlyRevenueChart.destroy();
-  monthlyRevenueChart = new Chart(document.getElementById('chartMonthlyRevenue'), {
+  // Revenue chart
+  chartInstances.revenue = new Chart(document.getElementById('chart-revenue'), {
     type: 'bar',
     data: {
-      labels: months12,
+      labels: months,
       datasets: [
         {
           label: 'Goal ($)',
-          data: d.goalDollars,
-          backgroundColor: goalColor + '33',
-          borderColor: goalColor,
-          borderWidth: 2,
-          borderRadius: 4,
+          data: d.months.map(m => m.goalD),
+          backgroundColor: 'rgba(107,116,145,0.3)',
+          borderColor: '#6b7491', borderWidth: 1, borderRadius: 3
         },
         {
-          label: 'Actual Est. ($)',
-          data: actualRevenue,
-          backgroundColor: actualColor + '88',
-          borderColor: actualColor,
-          borderWidth: 2,
-          borderRadius: 4,
+          label: 'Actual ($)',
+          data: d.months.map(m => m.totalAmt),
+          backgroundColor: color + '99',
+          borderColor: color, borderWidth: 1, borderRadius: 3
         }
       ]
     },
     options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend: { labels: { color: '#5a6180', font: { size: 12 }, boxWidth: 14 } },
-        tooltip: { callbacks: { label: ctx => ctx.raw !== null ? `${ctx.dataset.label}: $${(ctx.raw||0).toLocaleString()}` : `${ctx.dataset.label}: No data` } }
-      },
+      ...chartDefaults,
       scales: {
-        y: { ticks: { callback: v => '$'+(v/1000).toFixed(0)+'K', color: '#5a6180' }, grid: { color: '#1f2433' }, beginAtZero: true },
-        x: { grid: { display: false }, ticks: { color: '#5a6180' } }
+        ...chartDefaults.scales,
+        y: { ...chartDefaults.scales.y, ticks: { ...chartDefaults.scales.y.ticks, callback: v => '$' + (v >= 1e6 ? (v/1e6).toFixed(1)+'M' : v >= 1e3 ? (v/1e3).toFixed(0)+'K' : v) } }
       }
     }
   });
 
-  // Variance (only for months with data)
-  const varianceData = months12.map((_, i) => {
-    const a = actualUnits[i];
-    if (a === null) return null;
-    return a - d.goalUnits[i];
-  });
-
-  if (monthlyVarianceChart) monthlyVarianceChart.destroy();
-  monthlyVarianceChart = new Chart(document.getElementById('chartMonthlyVariance'), {
-    type: 'bar',
+  // % to goal
+  chartInstances.pct = new Chart(document.getElementById('chart-pct'), {
+    type: 'line',
     data: {
-      labels: months12,
-      datasets: [{
-        label: 'Variance',
-        data: varianceData,
-        backgroundColor: varianceData.map(v => v === null ? 'transparent' : v >= 0 ? '#4ade8044' : '#f8717144'),
-        borderColor: varianceData.map(v => v === null ? 'transparent' : v >= 0 ? '#4ade80' : '#f87171'),
-        borderWidth: 2,
-        borderRadius: 4,
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        y: { grid: { color: '#1f2433' }, ticks: { color: '#5a6180' } },
-        x: { grid: { display: false }, ticks: { color: '#5a6180' } }
-      }
-    }
-  });
-
-  // % to goal (only for months with data)
-  const pctData = months12.map((_, i) => {
-    const a = actualUnits[i];
-    if (a === null) return null;
-    const g = d.goalUnits[i];
-    return g > 0 ? Math.round((a/g)*100) : 0;
-  });
-
-  if (monthlyPctChart) monthlyPctChart.destroy();
-  monthlyPctChart = new Chart(document.getElementById('chartMonthlyPct'), {
-    type: 'bar',
-    data: {
-      labels: months12,
+      labels: months,
       datasets: [{
         label: '% to Goal',
-        data: pctData,
-        backgroundColor: pctData.map(v => v === null ? 'transparent' : v >= 100 ? '#4ade8044' : v >= 50 ? '#e8ff4733' : '#f8717122'),
-        borderColor: pctData.map(v => v === null ? 'transparent' : v >= 100 ? '#4ade80' : v >= 50 ? '#e8ff47' : '#f87171'),
-        borderWidth: 2,
-        borderRadius: 4,
+        data: d.months.map(m => m.pctGoal),
+        borderColor: color, backgroundColor: color + '22',
+        tension: 0.3, fill: true, pointBackgroundColor: color, pointRadius: 4
+      }, {
+        label: '100% Target',
+        data: months.map(() => 100),
+        borderColor: '#6b7491', borderDash: [4,4], borderWidth: 1,
+        pointRadius: 0, fill: false
       }]
     },
     options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        annotation: {},
-      },
-      scales: {
-        y: { grid: { color: '#1f2433' }, ticks: { callback: v => v+'%', color: '#5a6180' }, max: 150 },
-        x: { grid: { display: false }, ticks: { color: '#5a6180' } }
-      }
+      ...chartDefaults,
+      scales: { ...chartDefaults.scales, y: { ...chartDefaults.scales.y, ticks: { ...chartDefaults.scales.y.ticks, callback: v => v + '%' } } }
     }
   });
 
-  // Table
-  let html = `<thead><tr>
-    <th>Month</th><th>Goal (Units)</th><th>Actual (Units)</th><th>Variance</th><th>% to Goal</th>
-    <th>Goal ($)</th><th>Actual Est. ($)</th><th>Revenue Variance</th>
-  </tr></thead><tbody>`;
-
-  let totalActualRev = 0, totalGoalRev = 0;
-  months12.forEach((m, i) => {
-    const g = d.goalUnits[i];
-    const a = actualUnits[i];
-    const v = a !== null ? a - g : null;
-    const p = a !== null && g > 0 ? Math.round((a/g)*100) : null;
-    const gd = d.goalDollars[i];
-    const ar = actualRevenue[i];
-    const rv = ar !== null ? ar - gd : null;
-    const vClass = v !== null ? (v >= 0 ? 'num-positive' : 'num-negative') : 'num-neutral';
-    totalGoalRev += gd;
-    if (ar !== null) totalActualRev += ar;
-    html += `<tr>
-      <td>${m}</td>
-      <td>${g}</td>
-      <td>${a !== null ? a : '<span class="num-neutral">—</span>'}</td>
-      <td class="${vClass}">${v !== null ? (v >= 0 ? '+' : '') + v : '<span class="num-neutral">—</span>'}</td>
-      <td class="${p !== null ? (p >= 100 ? 'num-positive' : p >= 50 ? '' : 'num-negative') : 'num-neutral'}">${p !== null ? p + '%' : '—'}</td>
-      <td>$${gd.toLocaleString()}</td>
-      <td>${ar !== null ? '$' + ar.toLocaleString() : '<span class="num-neutral">—</span>'}</td>
-      <td class="${rv !== null ? (rv >= 0 ? 'num-positive' : 'num-negative') : 'num-neutral'}">${rv !== null ? (rv >= 0 ? '+' : '') + '$' + Math.abs(rv).toLocaleString() : '—'}</td>
-    </tr>`;
+  // Variance
+  const varData = d.months.map(m => m.variance);
+  chartInstances.variance = new Chart(document.getElementById('chart-variance'), {
+    type: 'bar',
+    data: {
+      labels: months,
+      datasets: [{
+        label: 'Variance',
+        data: varData,
+        backgroundColor: varData.map(v => v === null ? '#1e2330' : v >= 0 ? '#3de87a44' : '#e84f4f44'),
+        borderColor: varData.map(v => v === null ? '#1e2330' : v >= 0 ? '#3de87a' : '#e84f4f'),
+        borderWidth: 1, borderRadius: 3
+      }]
+    },
+    options: { ...chartDefaults }
   });
-
-  const totalV = totalActual - ytdGoal;
-  html += `<tr class="total-row">
-    <td>TOTAL</td><td>${totalGoal}</td><td>${totalActual}</td>
-    <td>${totalV >= 0 ? '+' : ''}${totalV}</td><td>${ytdPct}%</td>
-    <td>$${totalGoalRev.toLocaleString()}</td>
-    <td>$${totalActualRev.toLocaleString()}</td>
-    <td>${(totalActualRev - totalGoalRev) >= 0 ? '+' : ''}$${Math.abs(totalActualRev - totalGoalRev).toLocaleString()}</td>
-  </tr></tbody>`;
-  document.getElementById('monthlyTable').innerHTML = html;
 }
 
-function switchTab(name) {
-  document.querySelectorAll('.tab').forEach((t,i) => {
-    const names = ['overview','scorecard','monthly','leads'];
-    t.classList.toggle('active', names[i] === name);
-  });
-  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+async function loadData() {
+  try {
+    const res = await fetch(CSV_URL + '&t=' + Date.now());
+    const text = await res.text();
+    const rows = parseCSV(text);
+    divisionData = extractDivisions(rows);
+
+    const names = Object.keys(divisionData);
+    if (!activeScoreDiv || !divisionData[activeScoreDiv]) activeScoreDiv = names[0];
+    if (!activeChartDiv || !divisionData[activeChartDiv]) activeChartDiv = names[0];
+
+    renderOverview();
+    renderScorecard(activeScoreDiv);
+    renderCharts(activeChartDiv);
+
+    document.getElementById('last-updated').textContent = 'Updated ' + new Date().toLocaleTimeString();
+    document.getElementById('loader').classList.add('hidden');
+  } catch (e) {
+    document.getElementById('loader').innerHTML = `
+      <div class="logo" style="color:var(--red)">Error Loading Data</div>
+      <div class="sub">${e.message}</div>
+      <button class="refresh-btn" onclick="loadData()">Try Again</button>
+    `;
+  }
+}
+
+function showTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
-  if (name === 'monthly') renderMonthly(currentMonthlyDiv);
+  event.currentTarget.classList.add('active');
 }
 
-// Animate progress bars on load
-setTimeout(() => {
-  document.querySelectorAll('.progress-fill').forEach(el => {
-    const w = el.style.width;
-    el.style.width = '0';
-    requestAnimationFrame(() => { el.style.width = w; });
-  });
-  document.querySelectorAll('.funnel-fill').forEach(el => {
-    const w = el.style.width;
-    el.style.width = '0';
-    requestAnimationFrame(() => { el.style.width = w; });
-  });
-}, 100);
+loadData();
 </script>
-
-
-</body></html>
+</body>
+</html>
