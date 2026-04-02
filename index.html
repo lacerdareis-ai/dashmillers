@@ -436,15 +436,15 @@
       </div>
       <div class="kpi" style="--kpi-color: var(--green)">
         <div class="kpi-label">Actual Deals (YTD)</div>
-        <div class="kpi-value">28</div>
+        <div class="kpi-value">30</div>
         <div class="kpi-sub">Jan–Mar across all divisions</div>
-        <div class="kpi-badge badge-green">+28 Units</div>
+        <div class="kpi-badge badge-green">+30 Units</div>
       </div>
       <div class="kpi" style="--kpi-color: var(--accent3)">
         <div class="kpi-label">YTD Revenue</div>
-        <div class="kpi-value">$2.69M</div>
+        <div class="kpi-value">$3.1M</div>
         <div class="kpi-sub">Jan–Mar all divisions</div>
-        <div class="kpi-badge badge-red">~3.8% of goal</div>
+        <div class="kpi-badge badge-red">~4.5% of goal</div>
       </div>
       <div class="kpi" style="--kpi-color: var(--accent4)">
         <div class="kpi-label">Lead Pipeline (Ann.)</div>
@@ -455,7 +455,7 @@
       <div class="kpi" style="--kpi-color: var(--accent2)">
         <div class="kpi-label">Best Performer</div>
         <div class="kpi-value">MPL Const</div>
-        <div class="kpi-sub">Jan: 200% of goal (2 vs 1)</div>
+        <div class="kpi-sub">Jan: 300% of goal (3 vs 1)</div>
         <div class="kpi-badge badge-green">🔥 Crushing It</div>
       </div>
     </div>
@@ -643,10 +643,10 @@ const divisions = {
     color: '#e8ff47',
     goalUnits: [0,2,6,16,6,20,10,12,12,12,2,2],
     goalDollars: [0,240000,720000,1920000,720000,2400000,1200000,1440000,1440000,1440000,240000,240000],
-    actualDollars: [0,209100,null,null,null,null,null,null,null,null,null,null],
-    actual: [0,4,null,null,null,null,null,null,null,null,null,null],
-    variance: [0,2],
-    ytdRevenue: 209100,
+    actualDollars: [0,209100,265600,null,null,null,null,null,null,null,null,null],
+    actual: [0,4,3,null,null,null,null,null,null,null,null,null],
+    variance: [0,2,-3],
+    ytdRevenue: 474700,
     totalGoalUnits: 100,
     totalGoalDollars: 12000000,
     note: 'Cape Cod + MV combined'
@@ -656,10 +656,10 @@ const divisions = {
     color: '#e8ff47',
     goalUnits: [0,1,3,8,3,10,5,6,6,6,1,1],
     goalDollars: [0,120000,360000,960000,360000,1200000,600000,720000,720000,720000,120000,120000],
-    actualDollars: [0,209100,null,null,null,null,null,null,null,null,null,null],
-    actual: [0,2,null,null,null,null,null,null,null,null,null,null],
-    variance: [0,1],
-    ytdRevenue: 209100,
+    actualDollars: [0,209100,174800,null,null,null,null,null,null,null,null,null],
+    actual: [0,2,2,null,null,null,null,null,null,null,null,null],
+    variance: [0,1,-1],
+    ytdRevenue: 383900,
     totalGoalUnits: 50,
     totalGoalDollars: 6000000,
   },
@@ -668,10 +668,10 @@ const divisions = {
     color: '#f0ff80',
     goalUnits: [0,1,3,8,3,10,5,6,6,6,1,1],
     goalDollars: [0,120000,360000,960000,360000,1200000,600000,720000,720000,720000,120000,120000],
-    actualDollars: [0,209100,null,null,null,null,null,null,null,null,null,null],
-    actual: [0,2,null,null,null,null,null,null,null,null,null,null],
-    variance: [0,1],
-    ytdRevenue: 209100,
+    actualDollars: [0,209100,90800,null,null,null,null,null,null,null,null,null],
+    actual: [0,2,1,null,null,null,null,null,null,null,null,null],
+    variance: [0,1,-2],
+    ytdRevenue: 299900,
     totalGoalUnits: 50,
     totalGoalDollars: 6000000,
   },
@@ -680,10 +680,10 @@ const divisions = {
     color: '#47c4ff',
     goalUnits: [1,8,20,20,20,20,30,20,20,0,0,0],
     goalDollars: [5000,100000,100000,100000,100000,100000,150000,100000,100000,0,0,0],
-    actualDollars: [5700,24500,null,null,null,null,null,null,null,null,null,null],
-    actual: [2,10,null,null,null,null,null,null,null,null,null,null],
-    variance: [1,2],
-    ytdRevenue: 30200,
+    actualDollars: [5700,24500,8850,null,null,null,null,null,null,null,null,null],
+    actual: [2,10,3,null,null,null,null,null,null,null,null,null],
+    variance: [1,2,-17],
+    ytdRevenue: 39050,
     totalGoalUnits: 139,
     totalGoalDollars: 855000,
     note: 'Cape Cod + MV combined'
@@ -693,10 +693,10 @@ const divisions = {
     color: '#47c4ff',
     goalUnits: [1,4,10,10,10,10,15,10,10,0,0,0],
     goalDollars: [5000,20000,50000,50000,50000,50000,75000,50000,50000,0,0,0],
-    actualDollars: [5700,24500,null,null,null,null,null,null,null,null,null,null],
-    actual: [1,5,null,null,null,null,null,null,null,null,null,null],
-    variance: [0,1],
-    ytdRevenue: 30200,
+    actualDollars: [5700,24500,4600,null,null,null,null,null,null,null,null,null],
+    actual: [1,5,1,null,null,null,null,null,null,null,null,null],
+    variance: [0,1,-9],
+    ytdRevenue: 34800,
     totalGoalUnits: 80,
     totalGoalDollars: 400000,
   },
@@ -705,10 +705,10 @@ const divisions = {
     color: '#7dd8ff',
     goalUnits: [0,4,10,10,10,10,15,10,10,0,0,0],
     goalDollars: [0,100000,200000,200000,100000,150000,150000,100000,100000,0,0,0],
-    actualDollars: [5700,24500,null,null,null,null,null,null,null,null,null,null],
-    actual: [1,5,null,null,null,null,null,null,null,null,null,null],
-    variance: [1,1],
-    ytdRevenue: 30200,
+    actualDollars: [5700,24500,4250,null,null,null,null,null,null,null,null,null],
+    actual: [1,5,2,null,null,null,null,null,null,null,null,null],
+    variance: [1,1,-8],
+    ytdRevenue: 34450,
     totalGoalUnits: 59,
     totalGoalDollars: 1100000,
   },
@@ -717,10 +717,10 @@ const divisions = {
     color: '#ff6b47',
     goalUnits: [1,1,6,6,4,4,5,5,5,3,0,0],
     goalDollars: [120000,120000,720000,720000,480000,480000,600000,600000,600000,360000,0,0],
-    actualDollars: [178890,0,null,null,null,null,null,null,null,null,null,null],
-    actual: [2,0,null,null,null,null,null,null,null,null,null,null],
-    variance: [1,-1],
-    ytdRevenue: 178890,
+    actualDollars: [308430,0,0,null,null,null,null,null,null,null,null,null],
+    actual: [3,0,0,null,null,null,null,null,null,null,null,null],
+    variance: [2,-1,-6],
+    ytdRevenue: 308430,
     totalGoalUnits: 40,
     totalGoalDollars: 4800000,
   },
@@ -741,23 +741,23 @@ const divisions = {
     color: '#a78bfa',
     goalUnits: [4,4,4,4,6,6,6,6,7,4,6,3],
     goalDollars: [80000,80000,80000,80000,120000,120000,120000,120000,140000,80000,120000,60000],
-    actualDollars: [74966,null,0,null,null,null,null,null,null,null,null,null],
-    actual: [2,null,6,null,null,null,null,null,null,null,null,null],
-    variance: [-2,null,2],
-    ytdRevenue: 74966,
+    actualDollars: [74966,0,4550,null,null,null,null,null,null,null,null,null],
+    actual: [1,0,2,null,null,null,null,null,null,null,null,null],
+    variance: [-3,-4,-2],
+    ytdRevenue: 79516,
     totalGoalUnits: 60,
     totalGoalDollars: 1200000,
-    note: 'Cape Cod + MV combined. Mar: CC=3, MV=3'
+    note: 'Cape Cod + MV combined'
   },
   rns_cc: {
     name: 'RNS – Cape Cod',
     color: '#a78bfa',
     goalUnits: [2,2,2,2,3,3,3,3,4,2,3,2],
     goalDollars: [40000,40000,40000,40000,60000,60000,60000,60000,80000,40000,60000,40000],
-    actualDollars: [74966,null,0,null,null,null,null,null,null,null,null,null],
-    actual: [1,null,3,null,null,null,null,null,null,null,null,null],
-    variance: [-1,null,1],
-    ytdRevenue: 74966,
+    actualDollars: [0,0,4550,null,null,null,null,null,null,null,null,null],
+    actual: [0,0,2,null,null,null,null,null,null,null,null,null],
+    variance: [-2,-2,0],
+    ytdRevenue: 4550,
     totalGoalUnits: 31,
     totalGoalDollars: 620000,
   },
@@ -766,9 +766,9 @@ const divisions = {
     color: '#c4b5fd',
     goalUnits: [2,2,2,2,3,3,3,3,4,2,3,1],
     goalDollars: [40000,40000,40000,40000,60000,60000,60000,60000,80000,40000,60000,20000],
-    actualDollars: [74966,null,0,null,null,null,null,null,null,null,null,null],
-    actual: [1,null,3,null,null,null,null,null,null,null,null,null],
-    variance: [-1,null,1],
+    actualDollars: [74966,0,0,null,null,null,null,null,null,null,null,null],
+    actual: [1,0,0,null,null,null,null,null,null,null,null,null],
+    variance: [-1,-2,-2],
     ytdRevenue: 74966,
     totalGoalUnits: 29,
     totalGoalDollars: 600000,
@@ -851,7 +851,7 @@ new Chart(document.getElementById('chartGoalDiv'), {
 
 // Overview: Deal Progress Bars
 const dealGoals = { 'MP Construction':100,'MP Maintenance':139,'MPL Construction':40,'MPL Maintenance':300,'RNS':60,'MPC':11 };
-const dealActuals = { 'MP Construction':4,'MP Maintenance':12,'MPL Construction':2,'MPL Maintenance':0,'RNS':8,'MPC':2 };
+const dealActuals = { 'MP Construction':7,'MP Maintenance':15,'MPL Construction':3,'MPL Maintenance':0,'RNS':3,'MPC':2 };
 const container = document.getElementById('dealProgress');
 Object.entries(dealGoals).forEach(([name, goal], i) => {
   const actual = dealActuals[name];
