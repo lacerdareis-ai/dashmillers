@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Millers Sales Dashboard 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--bg:#0a0c10;--surface:#111318;--surface2:#181c24;--border:#1f2433;--accent:#e8ff47;--accent2:#47c4ff;--accent3:#ff6b47;--accent4:#a78bfa;--text:#e8eaf0;--muted:#5a6180;--green:#4ade80;--red:#f87171;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-weight:300;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:48px 48px;opacity:.25;pointer-events:none;z-index:0;}
+
+/* SIDEBAR NAV */
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:220px;background:var(--surface);border-right:1px solid var(--border);z-index:100;overflow-y:auto;padding:0 0 24px 0;}
+.sidebar-header{padding:24px 20px 16px;border-bottom:1px solid var(--border);margin-bottom:8px;}
+.sidebar-brand{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.15em;color:var(--muted);text-transform:uppercase;margin-bottom:6px;}
+.sidebar-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;line-height:1.1;}
+.sidebar-title span{color:var(--accent);}
+.nav-section{padding:8px 12px 4px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 20px;cursor:pointer;transition:all .15s;border-left:2px solid transparent;font-size:13px;color:var(--muted);}
+.nav-item:hover{background:var(--surface2);color:var(--text);}
+.nav-item.active{background:rgba(232,255,71,.06);border-left-color:var(--accent);color:var(--accent);}
+.nav-group{margin-bottom:4px;}
+.nav-group-header{display:flex;align-items:center;justify-content:space-between;padding:8px 20px 6px;cursor:pointer;transition:all .15s;user-select:none;}
+.nav-group-header:hover{background:var(--surface2);}
+.nav-group-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--text);font-weight:500;display:flex;align-items:center;gap:8px;}
+.nav-group-label .group-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0;}
+.nav-group-arrow{font-size:9px;color:var(--muted);transition:transform .2s;}
+.nav-group-arrow.open{transform:rotate(90deg);}
+.nav-group-items{overflow:hidden;transition:max-height .25s ease;}
+.nav-group-items.collapsed{max-height:0 !important;}
+.nav-item.sub{padding-left:36px;font-size:12px;}
+.nav-item.sub .nav-dot{width:5px;height:5px;}
+.nav-item.sub2{padding-left:52px;font-size:11px;}
+.nav-item.sub2 .nav-dot{width:4px;height:4px;}
+.brand-header{background:rgba(255,255,255,.03);border-bottom:1px solid var(--border);}
+.brand-label{font-size:11px;letter-spacing:.04em;}
+.div-header{padding:7px 20px 7px 28px;}
+.div-label{font-size:10px;letter-spacing:.06em;color:var(--muted);}
+.nav-dot{width:7px;height:7px;border-radius:50%;background:var(--muted);flex-shrink:0;transition:background .15s;}
+.nav-item.active .nav-dot,.nav-item:hover .nav-dot{background:currentColor;}
+.live-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(74,222,128,.1);border:1px solid var(--green);color:var(--green);font-family:'DM Mono',monospace;font-size:9px;padding:3px 8px;border-radius:99px;margin:12px 20px 0;width:fit-content;}
+.live-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:pulse 2s ease infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* MAIN CONTENT */
+.main{margin-left:220px;padding:32px;position:relative;z-index:1;min-height:100vh;}
+
+/* PAGES */
+.page{display:none;}
+.page.active{display:block;}
+
+/* HEADER */
+.page-header{margin-bottom:28px;}
+.page-eyebrow{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.15em;color:var(--muted);text-transform:uppercase;margin-bottom:8px;}
+.page-title{font-family:'Syne',sans-serif;font-size:clamp(24px,3vw,42px);font-weight:800;line-height:1;letter-spacing:-.02em;}
+.page-title span{color:var(--accent);}
+.page-meta{margin-top:8px;font-size:13px;color:var(--muted);}
+
+/* LOADER */
+#loader{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:16px;}
+.spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loader-text{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:.1em;}
+
+/* KPIs */
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:24px;}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 20px;position:relative;overflow:hidden;transition:border-color .2s,transform .2s;}
+.kpi:hover{border-color:var(--accent);transform:translateY(-2px);}
+.kpi::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--kpi-color,var(--accent));}
+.kpi-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.kpi-value{font-family:'Syne',sans-serif;font-size:26px;font-weight:700;line-height:1;margin-bottom:3px;}
+.kpi-sub{font-size:11px;color:var(--muted);}
+.kpi-badge{display:inline-block;font-family:'DM Mono',monospace;font-size:9px;padding:2px 7px;border-radius:99px;margin-top:5px;}
+.badge-green{background:rgba(74,222,128,.12);color:var(--green);}
+.badge-red{background:rgba(248,113,113,.12);color:var(--red);}
+.badge-yellow{background:rgba(232,255,71,.12);color:var(--accent);}
+.badge-blue{background:rgba(71,196,255,.12);color:var(--accent2);}
+
+/* GRIDS */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px;}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;margin-bottom:18px;}
+@media(max-width:1100px){.grid-2,.grid-3{grid-template-columns:1fr;}}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px;margin-bottom:18px;}
+.card:hover{border-color:rgba(232,255,71,.15);}
+.card-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;margin-bottom:18px;display:flex;align-items:center;gap:8px;}
+.card-title .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.chart-wrap{position:relative;height:240px;}
+.chart-wrap-lg{position:relative;height:300px;}
+
+/* PROGRESS */
+.progress-list{display:flex;flex-direction:column;gap:12px;}
+.progress-header{display:flex;justify-content:space-between;margin-bottom:5px;font-size:12px;}
+.progress-name{color:var(--text);font-weight:500;}
+.progress-nums{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);}
+.progress-track{height:5px;background:var(--border);border-radius:99px;overflow:hidden;}
+.progress-fill{height:100%;border-radius:99px;background:var(--fill-color,var(--accent));transition:width 1.2s cubic-bezier(.16,1,.3,1);}
+
+/* TABLE */
+.data-table{width:100%;border-collapse:collapse;font-size:12px;}
+.data-table th{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:7px 10px;text-align:left;border-bottom:1px solid var(--border);}
+.data-table td{padding:9px 10px;border-bottom:1px solid rgba(31,36,51,.5);font-family:'DM Mono',monospace;font-size:11px;}
+.data-table tr:last-child td{border-bottom:none;}
+.data-table tr:hover td{background:var(--surface2);}
+.total-row td{font-weight:500;color:var(--accent);border-top:1px solid var(--border)!important;}
+.num-pos{color:var(--green);}.num-neg{color:var(--red);}.num-muted{color:var(--muted);}
+
+/* COMPANY PAGE SPECIFIC */
+.company-color-bar{height:4px;border-radius:99px;margin-bottom:24px;width:60px;}
+.stat-comparison{display:flex;align-items:center;gap:16px;padding:16px 0;border-bottom:1px solid var(--border);}
+.stat-comparison:last-child{border-bottom:none;}
+.stat-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;width:100px;flex-shrink:0;}
+.stat-bar-wrap{flex:1;display:flex;align-items:center;gap:12px;}
+.stat-bar-track{flex:1;height:8px;background:var(--border);border-radius:99px;overflow:hidden;}
+.stat-goal-fill{height:100%;border-radius:99px;background:var(--border);position:relative;}
+.stat-actual-fill{height:100%;border-radius:99px;position:absolute;top:0;left:0;transition:width 1.2s cubic-bezier(.16,1,.3,1);}
+.stat-val{font-family:'DM Mono',monospace;font-size:11px;width:90px;text-align:right;flex-shrink:0;}
+
+/* OVERVIEW CARDS */
+.company-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 20px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;}
+.company-card:hover{transform:translateY(-3px);border-color:var(--card-color,var(--accent));}
+.company-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--card-color,var(--accent));}
+.company-card-name{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:12px;}
+.company-card-stats{display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);}
+.company-card-pct{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;margin:8px 0 4px;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.anim{animation:fadeUp .4s ease both;}
+</style>
+</head>
+<body>
+
+<div id="loader">
+  <div class="spinner"></div>
+  <div class="loader-text">FETCHING LIVE DATA FROM GOOGLE SHEETS...</div>
+</div>
+
+<!-- SIDEBAR -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-brand">Millers Pros Group</div>
+    <div class="sidebar-title">Sales <span>2026</span></div>
+  </div>
+  <div class="live-badge"><span class="live-dot"></span>LIVE DATA</div>
+  <div style="margin-top:16px">
+    <div class="nav-section">Main</div>
+    <div class="nav-item active" data-page="overview" onclick="showPage('overview')"><span class="nav-dot"></span>Overview</div>
+    <div class="nav-section" style="margin-top:12px">Goals vs Sales</div>
+    <div id="navLinks"></div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- OVERVIEW PAGE -->
+  <div class="page active" id="page-overview">
+    <div class="page-header">
+      <div class="page-eyebrow">Sales Scorecard 2026</div>
+      <div class="page-title">All <span>Companies</span> Overview</div>
+      <div class="page-meta" id="overviewMeta">Loading...</div>
+    </div>
+    <div class="kpi-row" id="overviewKpis"></div>
+    <div class="grid-2">
+      <div class="card"><div class="card-title"><span class="dot" style="background:#e8ff47"></span>Revenue Goal by Company</div><div class="chart-wrap"><canvas id="chartGoalByDiv"></canvas></div></div>
+      <div class="card"><div class="card-title"><span class="dot" style="background:#47c4ff"></span>YTD Revenue by Company</div><div class="chart-wrap"><canvas id="chartRevenueByDiv"></canvas></div></div>
+    </div>
+    <div class="card"><div class="card-title"><span class="dot" style="background:#ff6b47"></span>% of Period Goal Achieved — All Companies</div><div class="chart-wrap-lg"><canvas id="chartPctAll"></canvas></div></div>
+    <div style="margin-bottom:12px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;">Click a company to view detailed Goals vs Sales</div>
+    <div id="companyCards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:24px;"></div>
+  </div>
+
+  <!-- COMPANY PAGES — generated dynamically -->
+  <div id="companyPages"></div>
+
+</div>
+
+<script>
+const SHEET_ID = '1fpG2JnR1dTKvIEwKdS0iX77DJ1mTluJRIbuAj7gCpCY';
+const SHEET_GID = '1712249041';
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const PALETTE = ['#e8ff47','#47c4ff','#ff6b47','#4ade80','#a78bfa','#f472b6','#fb923c','#34d399','#60a5fa','#f472b6','#fdba74','#c4b5fd','#86efac'];
+
+Chart.defaults.color = '#5a6180';
+Chart.defaults.borderColor = '#1f2433';
+Chart.defaults.font.family = "'DM Mono', monospace";
+
+let companies = [];
+let chartInstances = {};
+let currentPage = 'overview';
+
+// ── PARSING ────────────────────────────────────────────────────────────────
+function num(v) {
+  if (!v || typeof v !== 'string') return null;
+  const s = v.trim();
+  if (!s || s === '#DIV/0!' || s === '#REF!' || s === '#N/A' || s === '#VALUE!') return null;
+  const n = parseFloat(s.replace(/[$,%\s"]/g, ''));
+  return isNaN(n) ? null : n;
+}
+
+function parseCSV(csv) {
+  const rows = [];
+  const lines = csv.split('\n');
+  for (const line of lines) {
+    const cells = [];
+    let cur = '', inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      const c = line[i];
+      if (c === '"') { inQ = !inQ; }
+      else if (c === ',' && !inQ) { cells.push(cur.trim()); cur = ''; }
+      else { cur += c; }
+    }
+    cells.push(cur.trim());
+    rows.push(cells);
+  }
+  return rows;
+}
+
+// ── DYNAMIC PARSER ──────────────────────────────────────────────────────────
+const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+// DIVISION_MAP: keyword variants → canonical company name
+const DIVISION_MAP = [
+  // Pools Construction
+  { keys: ['MP CONSTRUCTION CAPE COD', 'MP CONST CAPE', 'MPC CAPE COD CONSTRUCTION'], name: 'MP Construction – Cape Cod' },
+  { keys: ['MP CONSTRUCTION MV', 'MP CONST MV', 'MPC MV CONSTRUCTION'], name: 'MP Construction – MV' },
+  // Pools Maintenance
+  { keys: ['MP MAINTENANCE CAPE COD', 'MP MAINT CAPE COD', 'MPC MAINTENANCE CAPE'], name: 'MP Maintenance – Cape Cod' },
+  { keys: ['MP MAINTENANCE MV', 'MP MAINT MV', 'MPC MAINTENANCE MV'], name: 'MP Maintenance – MV' },
+  // Pools Repair
+  { keys: ['MP REPAIR CAPE COD', 'MP REPAIR CC', 'MPC REPAIR CAPE'], name: 'MP Repair – Cape Cod' },
+  { keys: ['MP REPAIR MV', 'MP REP MV', 'MPC REPAIR MV'], name: 'MP Repair – MV' },
+  // Landscape Construction
+  { keys: ['MPL CONSTRUCTION', 'MPL CONST', 'LANDSCAPE CONSTRUCTION'], name: 'MPL Construction' },
+  // Landscape Maintenance
+  { keys: ['MPL MAINTENANCE', 'MPL MAINT', 'LANDSCAPE MAINTENANCE'], name: 'MPL Maintenance' },
+  // Landscape Repair
+  { keys: ['MPL REPAIR', 'MPL REP ', 'LANDSCAPE REPAIR'], name: 'MPL Repair' },
+  // Roofing
+  { keys: ['RNS CAPE COD', 'RNS CC', 'ROOFING CAPE COD', 'MILLERS ROOFING CAPE'], name: 'RNS – Cape Cod' },
+  { keys: ['RNS MV', 'ROOFING MV', 'MILLERS ROOFING MV'], name: 'RNS – MV' },
+  // Pro Builders
+  { keys: ['MPC CAPE COD', 'PRO BUILDERS CAPE', 'MILLERS PRO CAPE'], name: 'MPC – Cape Cod' },
+  { keys: ['MPC MV', 'PRO BUILDERS MV', 'MILLERS PRO MV'], name: 'MPC – MV' },
+];
+
+function findCell(rows, keywordVariants) {
+  const variants = Array.isArray(keywordVariants) ? keywordVariants : [keywordVariants];
+  const kwUpper = variants.map(k => k.toUpperCase().trim());
+  for (let r = 0; r < rows.length; r++) {
+    const row = rows[r] || [];
+    for (let c = 0; c < row.length; c++) {
+      const cell = (row[c] || '').toString().toUpperCase().trim();
+      if (kwUpper.some(k => cell.includes(k))) {
+        return { row: r, col: c };
+      }
+    }
+  }
+  return null;
+}
+
+function findSubHeaderRow(rows, startRow, startCol) {
+  // Look in the next 4 rows after the company header to find GOAL/ACTUAL sub-header
+  for (let r = startRow; r < Math.min(startRow + 4, rows.length); r++) {
+    const row = rows[r] || [];
+    const texts = row.map(c => (c || '').toString().toUpperCase());
+    // Check for pattern: GOAL (U) or GOAL U or GOAL($) near ACTUAL or TOTAL AMOUNT
+    const hasGoal = texts.some(t => t.includes('GOAL'));
+    const hasActual = texts.some(t => t.includes('ACTUAL') || t.includes('TOTAL') || t.includes('AMOUNT'));
+    if (hasGoal) {
+      return r;
+    }
+  }
+  return startRow + 1;
+}
+
+function findColNear(headerRow, startCol, keywords) {
+  for (let c = startCol; c < Math.min(startCol + 12, headerRow.length); c++) {
+    const h = (headerRow[c] || '').toString().toUpperCase();
+    if (keywords.some(k => h.includes(k.toUpperCase()))) return c;
+  }
+  return -1;
+}
+
+function findColNear(headerRow, startCol, keywords) {
+  for (let c = startCol; c < Math.min(startCol + 12, headerRow.length); c++) {
+    const h = (headerRow[c] || '').toString().toUpperCase();
+    if (keywords.some(k => h.includes(k.toUpperCase()))) return c;
+  }
+  return -1;
+}
+
+function getColumnByHeader(headerRow, keywords) {
+  for (let c = 0; c < headerRow.length; c++) {
+    const h = (headerRow[c] || '').toString().toUpperCase();
+    if (keywords.some(k => h.includes(k.toUpperCase()))) {
+      return c;
+    }
+  }
+  return -1;
+}
+
+function findColNear(headerRow, startCol, keywords) {
+  for (let c = startCol; c < Math.min(startCol + 12, headerRow.length); c++) {
+    const h = (headerRow[c] || '').toString().toUpperCase();
+    if (keywords.some(k => h.includes(k.toUpperCase()))) return c;
+  }
+  return -1;
+}
+
+function extractCompany(rows, headerRowIdx, headerCol, companyName, color) {
+  // Sub-header IS the same row as company header in this sheet
+  const subHeader = rows[headerRowIdx] || [];
+
+  // Find column indices relative to this company's block
+  let goalUCol = findColNear(subHeader, headerCol, ['GOAL', 'U)', '(U)']);
+  if (goalUCol === -1) goalUCol = headerCol + 1;
+
+  let goalDCol = findColNear(subHeader, goalUCol, ['($)', 'DOLLAR', 'GOAL($)']);
+  if (goalDCol === -1) goalDCol = goalUCol + 1;
+
+  // Actual units: New Sale + Existing Client, or SALE (U), or fallback 0
+  let newSaleCol = findColNear(subHeader, headerCol, ['NEW SALE', 'NEW']);
+  let existingCol = findColNear(subHeader, headerCol, ['EXISTING', 'CLIENT']);
+  let saleUCol = findColNear(subHeader, headerCol, ['SALE (U)', 'SALE U']);
+
+  // Revenue: SALE ($) or Total Amount
+  let revenueCol = findColNear(subHeader, headerCol, ['SALE ($)', 'TOTAL', 'AMOUNT', 'REVENUE']);
+  if (revenueCol === -1) revenueCol = goalDCol + 3;
+
+  const dataStartRow = headerRowIdx + 1;
+  let goalUnits = []; let goalDollars = []; let actualUnits = []; let revenue = [];
+  let monthCount = 0;
+
+  for (let r = dataStartRow; r < rows.length && monthCount < 12; r++) {
+    const row = rows[r] || [];
+    const monthCell = (row[0] || '').toString().trim();
+    if (!monthCell) break;
+    // Case-insensitive month detection
+    const isMonth = MONTHS_SHORT.some(m => monthCell.toUpperCase().startsWith(m.toUpperCase()));
+    if (!isMonth) continue;
+
+    goalUnits.push(num(row[goalUCol]));
+    goalDollars.push(num(row[goalDCol]));
+
+    let au = 0;
+    if (newSaleCol !== -1 && existingCol !== -1) {
+      au = (num(row[newSaleCol]) || 0) + (num(row[existingCol]) || 0);
+    } else if (saleUCol !== -1) {
+      au = num(row[saleUCol]) || 0;
+    } else {
+      au = 0;
+    }
+    actualUnits.push(au || null);
+    revenue.push(num(row[revenueCol]));
+    monthCount++;
+  }
+
+  while (goalUnits.length < 12) {
+    goalUnits.push(null); goalDollars.push(null);
+    actualUnits.push(null); revenue.push(null);
+  }
+
+  const totalGoalUnits = goalUnits.reduce((s, v) => s + (v || 0), 0);
+  const totalGoalDollars = goalDollars.reduce((s, v) => s + (v || 0), 0);
+  const totalActual = actualUnits.filter(v => v !== null).reduce((s, v) => s + v, 0);
+  const totalRevenue = revenue.filter(v => v !== null && v > 0).reduce((s, v) => s + v, 0);
+  const trackedMonths = actualUnits.filter(v => v !== null).length;
+  const periodGoal = goalUnits.slice(0, trackedMonths).reduce((s, v) => s + (v || 0), 0);
+  const pctOfPeriodGoal = periodGoal > 0 ? Math.round((totalActual / periodGoal) * 100) : null;
+
+  return {
+    name: companyName, color,
+    goalUnits, goalDollars, actual: actualUnits, revenue,
+    totalGoalUnits, totalGoalDollars, totalActual, totalRevenue,
+    trackedMonths, periodGoal, pctOfPeriodGoal
+  };
+}
+
+
+
+
+
+function computeSubgroupColor(groupColor, subgroupColor) {
+  // Blend toward subgroup color if provided, else group color
+  return subgroupColor || groupColor;
+}
+
+// ── PARSE ALL COMPANIES ─────────────────────────────────────────────────────
+function parseAllCompanies(csv) {
+  const rows = parseCSV(csv);
+  const result = [];
+  let colorIdx = 0;
+  const nextColor = () => PALETTE[colorIdx++ % PALETTE.length];
+
+  // --- Phase 1: map keywords → positions ---
+  const allMatches = [];
+  DIVISION_MAP.forEach(div => {
+    const pos = findCell(rows, div.keys);
+    if (pos) {
+      allMatches.push({ ...pos, name: div.name });
+    }
+  });
+
+  // --- Phase 2: extract each company ---
+  allMatches.forEach(m => {
+    const comp = extractCompany(rows, m.row, m.col, m.name, nextColor());
+    result.push(comp);
+  });
+
+  // --- Phase 3: fallback broad scan if needed ---
+  if (result.length < 5) {
+    console.warn('[Dashboard] Only', result.length, 'companies found — running fallback scan');
+    for (let r = 0; r < rows.length; r++) {
+      for (let c = 0; c < rows[r].length; c++) {
+        const cell = (rows[r][c] || '').toString().toUpperCase();
+        // Skip numbers/months
+        if (cell.length < 4 || /^\d+$/.test(cell) || MONTHS_SHORT.some(m => cell.startsWith(m))) continue;
+        // Avoid duplicates
+        if (allMatches.some(m => m.row === r && m.col === c)) continue;
+        // Heuristic: it's a company if the next row has GOAL/ACTUAL nearby
+        const nextRow = rows[r+1] || [];
+        const window = nextRow.slice(c, c + 8).map(x => (x||'').toString().toUpperCase());
+        const hasGoal = window.some(t => t.includes('GOAL'));
+        const hasActual = window.some(t => t.includes('ACTUAL'));
+        if (hasGoal && hasActual) {
+          const name = rows[r][c].toString().trim();
+          const comp = extractCompany(rows, r, c, name, nextColor());
+          if (comp.totalGoalUnits > 0 || comp.totalActual > 0) {
+            result.push(comp);
+          }
+        }
+      }
+    }
+  }
+
+  return result.filter(c => c.totalGoalUnits > 0 || c.totalActual > 0);
+}
+
+// ── CHARTS ─────────────────────────────────────────────────────────────────
+function destroyChart(id) { if (chartInstances[id]) { chartInstances[id].destroy(); delete chartInstances[id]; } }
+function makeChart(id, cfg) { destroyChart(id); chartInstances[id] = new Chart(document.getElementById(id), cfg); }
+
+function shortName(n) {
+  return n.replace('MP Construction','MPC').replace('MP Maintenance','MPS').replace('MPL Construction','MPLC').replace('MPL Maintenance','MPLM').replace('MP Repair','Repair').replace('MPL Repair','MPLR').replace('– Cape Cod','CC').replace('– MV','MV').replace('– ','');
+}
+
+// ── OVERVIEW ───────────────────────────────────────────────────────────────
+function renderOverview() {
+  const totalGoal = companies.reduce((s, c) => s + c.totalGoalDollars, 0);
+  const totalActual = companies.reduce((s, c) => s + c.totalActual, 0);
+  const totalRev = companies.reduce((s, c) => s + c.totalRevenue, 0);
+  const maxTracked = Math.max(...companies.map(c => c.trackedMonths));
+  let bestCo = companies.reduce((b, c) => (c.pctOfPeriodGoal || 0) > (b.pctOfPeriodGoal || 0) ? c : b, companies[0]);
+
+  document.getElementById('overviewMeta').textContent = `Live data · Jan–${MONTHS[maxTracked-1]||'?'} 2026 · ${companies.length} companies tracked`;
+
+  document.getElementById('overviewKpis').innerHTML = `
+    <div class="kpi" style="--kpi-color:var(--accent)"><div class="kpi-label">Total Annual Goal</div><div class="kpi-value">$${(totalGoal/1e6).toFixed(0)}M</div><div class="kpi-sub">All companies combined</div><div class="kpi-badge badge-yellow">Full Year</div></div>
+    <div class="kpi" style="--kpi-color:var(--green)"><div class="kpi-label">YTD Deals Closed</div><div class="kpi-value">${totalActual}</div><div class="kpi-sub">Jan–${MONTHS[maxTracked-1]||'?'}</div><div class="kpi-badge badge-green">+${totalActual} units</div></div>
+    <div class="kpi" style="--kpi-color:var(--accent3)"><div class="kpi-label">YTD Revenue</div><div class="kpi-value">$${(totalRev/1e6).toFixed(2)}M</div><div class="kpi-sub">${maxTracked} months tracked</div><div class="kpi-badge badge-red">${totalGoal > 0 ? ((totalRev/totalGoal)*100).toFixed(1) : 0}% of goal</div></div>
+    <div class="kpi" style="--kpi-color:var(--accent2)"><div class="kpi-label">Companies</div><div class="kpi-value">${companies.length}</div><div class="kpi-sub">Geographic splits</div><div class="kpi-badge badge-blue">Live</div></div>
+    <div class="kpi" style="--kpi-color:#4ade80"><div class="kpi-label">Best Performer</div><div class="kpi-value" style="font-size:15px">${shortName(bestCo.name)}</div><div class="kpi-sub">${bestCo.pctOfPeriodGoal||0}% of period goal</div><div class="kpi-badge badge-green">🔥 Top</div></div>`;
+
+  const names = companies.map(c => shortName(c.name));
+  const colors = companies.map(c => c.color);
+
+  makeChart('chartGoalByDiv', {
+    type: 'bar',
+    data: { labels: names, datasets: [{ data: companies.map(c => c.totalGoalDollars), backgroundColor: colors.map(c => c+'33'), borderColor: colors, borderWidth: 2, borderRadius: 5 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: v => '$'+(v/1e6).toFixed(0)+'M' }, grid: { color: '#1f2433' } }, x: { grid: { display: false }, ticks: { maxRotation: 45, font: { size: 9 } } } } }
+  });
+
+  makeChart('chartRevenueByDiv', {
+    type: 'bar',
+    data: { labels: names, datasets: [{ data: companies.map(c => c.totalRevenue), backgroundColor: colors.map(c => c+'88'), borderColor: colors, borderWidth: 2, borderRadius: 5 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: v => '$'+(v/1000).toFixed(0)+'K' }, grid: { color: '#1f2433' } }, x: { grid: { display: false }, ticks: { maxRotation: 45, font: { size: 9 } } } } }
+  });
+
+  makeChart('chartPctAll', {
+    type: 'bar',
+    data: { labels: names, datasets: [{ label: '% to Period Goal', data: companies.map(c => c.pctOfPeriodGoal), backgroundColor: companies.map(c => (c.pctOfPeriodGoal||0) >= 100 ? '#4ade8066' : (c.pctOfPeriodGoal||0) >= 50 ? '#e8ff4766' : '#f8717166'), borderColor: companies.map(c => (c.pctOfPeriodGoal||0) >= 100 ? '#4ade80' : (c.pctOfPeriodGoal||0) >= 50 ? '#e8ff47' : '#f87171'), borderWidth: 2, borderRadius: 5 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: v => v+'%' }, grid: { color: '#1f2433' } }, x: { grid: { display: false }, ticks: { maxRotation: 45, font: { size: 9 } } } } }
+  });
+
+  const cardsEl = document.getElementById('companyCards');
+  cardsEl.innerHTML = '';
+  companies.forEach((c, i) => {
+    const pct = c.pctOfPeriodGoal || 0;
+    const card = document.createElement('div');
+    card.className = 'company-card';
+    card.style.setProperty('--card-color', c.color);
+    card.innerHTML = `
+      <div class="company-card-name">${c.name}</div>
+      <div class="company-card-pct" style="color:${pct>=100?'#4ade80':pct>=50?'#e8ff47':'#f87171'}">${pct}%</div>
+      <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:10px">of period goal</div>
+      <div class="company-card-stats">
+        <span>Goal: ${c.totalGoalUnits}u</span>
+        <span>Actual: ${c.totalActual}u</span>
+      </div>
+      <div class="progress-track" style="margin-top:8px">
+        <div class="progress-fill" style="--fill-color:${c.color};width:${Math.min(pct,100)}%"></div>
+      </div>
+      <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:8px">Rev: $${c.totalRevenue.toLocaleString()}</div>`;
+    card.onclick = () => showPage('company-' + i);
+    cardsEl.appendChild(card);
+  });
+}
+
+// ── COMPANY PAGES ───────────────────────────────────────────────────────────
+function buildCompanyPage(c, idx) {
+  const pct = c.pctOfPeriodGoal || 0;
+  const revGoal = c.goalDollars.slice(0, c.trackedMonths).reduce((s, v) => s + (v || 0), 0);
+  const revPct = revGoal > 0 ? Math.round((c.totalRevenue / revGoal) * 100) : null;
+
+  return `
+  <div class="page" id="page-company-${idx}">
+    <div class="page-header">
+      <div class="page-eyebrow">Goals vs Sales · 2026</div>
+      <div class="page-title"><span>${c.name.split('–')[0].trim()}</span>${c.name.includes('–') ? ' <span style="color:var(--muted);font-size:60%">'+c.name.split('–')[1].trim()+'</span>' : ''}</div>
+    </div>
+    <div class="company-color-bar" style="background:${c.color}"></div>
+
+    <div class="kpi-row">
+      <div class="kpi" style="--kpi-color:${c.color}"><div class="kpi-label">Annual Goal (Units)</div><div class="kpi-value">${c.totalGoalUnits}</div><div class="kpi-sub">Full year target</div></div>
+      <div class="kpi" style="--kpi-color:${c.color}"><div class="kpi-label">YTD Actual</div><div class="kpi-value">${c.totalActual}</div><div class="kpi-sub">${c.trackedMonths} month(s) tracked</div><div class="kpi-badge ${(c.totalActual-c.periodGoal)>=0?'badge-green':'badge-red'}">${(c.totalActual-c.periodGoal)>=0?'+':''}${c.totalActual-c.periodGoal} vs period</div></div>
+      <div class="kpi" style="--kpi-color:${c.color}"><div class="kpi-label">% to Period Goal</div><div class="kpi-value">${pct}%</div><div class="kpi-sub">vs ${c.periodGoal} unit period goal</div></div>
+      <div class="kpi" style="--kpi-color:${c.color}"><div class="kpi-label">Annual Rev Goal</div><div class="kpi-value">$${(c.totalGoalDollars/1e6).toFixed(1)}M</div><div class="kpi-sub">Full year</div></div>
+      <div class="kpi" style="--kpi-color:${c.color}"><div class="kpi-label">YTD Revenue</div><div class="kpi-value">$${(c.totalRevenue/1000).toFixed(0)}K</div><div class="kpi-sub">vs $${(revGoal/1000).toFixed(0)}K goal</div>${revPct!==null?`<div class="kpi-badge ${revPct>=100?'badge-green':revPct>=50?'badge-yellow':'badge-red'}">${revPct}% of period rev goal</div>`:''}</div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title"><span class="dot" style="background:${c.color}"></span>Monthly: Goal vs Actual (Units)</div>
+        <div class="chart-wrap"><canvas id="chart-${idx}-units"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="dot" style="background:#47c4ff"></span>Monthly: Goal vs Revenue ($)</div>
+        <div class="chart-wrap"><canvas id="chart-${idx}-revenue"></canvas></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="dot" style="background:${c.color}"></span>Full Monthly Breakdown — ${c.name}</div>
+      <div style="overflow-x:auto">
+        <table class="data-table" id="table-${idx}"></table>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderCompanyCharts(c, idx) {
+  makeChart(`chart-${idx}-units`, {
+    type: 'bar',
+    data: { labels: MONTHS, datasets: [
+      { label: 'Goal', data: c.goalUnits, backgroundColor: c.color+'33', borderColor: c.color, borderWidth: 2, borderRadius: 4 },
+      { label: 'Actual', data: c.actual, backgroundColor: '#47c4ff88', borderColor: '#47c4ff', borderWidth: 2, borderRadius: 4 }
+    ]},
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#5a6180', font: { size: 11 }, boxWidth: 12 } } }, scales: { y: { grid: { color: '#1f2433' }, beginAtZero: true, ticks: { color: '#5a6180' } }, x: { grid: { display: false }, ticks: { color: '#5a6180' } } } }
+  });
+
+  makeChart(`chart-${idx}-revenue`, {
+    type: 'bar',
+    data: { labels: MONTHS, datasets: [
+      { label: 'Goal ($)', data: c.goalDollars, backgroundColor: c.color+'33', borderColor: c.color, borderWidth: 2, borderRadius: 4 },
+      { label: 'Revenue', data: c.revenue, backgroundColor: '#47c4ff88', borderColor: '#47c4ff', borderWidth: 2, borderRadius: 4 }
+    ]},
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#5a6180', font: { size: 11 }, boxWidth: 12 } } }, scales: { y: { ticks: { callback: v => '$'+(v/1000).toFixed(0)+'K', color: '#5a6180' }, grid: { color: '#1f2433' }, beginAtZero: true }, x: { grid: { display: false }, ticks: { color: '#5a6180' } } } }
+  });
+
+  let html = `<thead><tr><th>Month</th><th>Goal (U)</th><th>Actual (U)</th><th>Variance</th><th>% Goal</th><th>Goal ($)</th><th>Revenue</th><th>Rev Var</th></tr></thead><tbody>`;
+  let totalRev = 0, totalGoalRev = 0;
+  MONTHS.forEach((m, i) => {
+    const g = c.goalUnits[i] || 0, a = c.actual[i], gd = c.goalDollars[i] || 0, r = c.revenue[i];
+    const v = a !== null ? a - g : null, pct = a !== null && g > 0 ? Math.round((a / g) * 100) : null;
+    const rv = r !== null ? r - gd : null;
+    const vc = v !== null ? (v >= 0 ? 'num-pos' : 'num-neg') : 'num-muted';
+    totalGoalRev += gd; if (r !== null && r > 0) totalRev += r;
+    html += `<tr><td>${m}</td><td>${g}</td><td>${a !== null ? a : '—'}</td>
+      <td class="${vc}">${v !== null ? (v >= 0 ? '+' : '') + v : '—'}</td>
+      <td class="${pct !== null ? (pct >= 100 ? 'num-pos' : pct >= 50 ? '' : 'num-neg') : 'num-muted'}">${pct !== null ? pct + '%' : '—'}</td>
+      <td>$${gd.toLocaleString()}</td><td>${r !== null && r > 0 ? '$' + r.toLocaleString() : '—'}</td>
+      <td class="${rv !== null ? (rv >= 0 ? 'num-pos' : 'num-neg') : 'num-muted'}">${rv !== null ? (rv >= 0 ? '+' : '') + '$' + Math.abs(rv).toLocaleString() : '—'}</td></tr>`;
+  });
+  const totalV = c.totalActual - c.periodGoal;
+  html += `<tr class="total-row"><td>TOTAL</td><td>${c.totalGoalUnits}</td><td>${c.totalActual}</td>
+    <td>${totalV >= 0 ? '+' : ''}${totalV}</td><td>${c.pctOfPeriodGoal || 0}%</td>
+    <td>$${totalGoalRev.toLocaleString()}</td><td>$${totalRev.toLocaleString()}</td>
+    <td>${(totalRev - totalGoalRev) >= 0 ? '+' : ''}$${Math.abs(totalRev - totalGoalRev).toLocaleString()}</td>
+  </tr></tbody>`;
+  document.getElementById(`table-${idx}`).innerHTML = html;
+}
+
+// ── NAVIGATION ─────────────────────────────────────────────────────────────
+function showPage(pageId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+  const page = document.getElementById('page-' + pageId);
+  if (page) {
+    page.classList.add('active');
+    if (pageId.startsWith('company-')) {
+      const idx = parseInt(pageId.replace('company-', ''));
+      setTimeout(() => renderCompanyCharts(companies[idx], idx), 50);
+    }
+  }
+
+  const navEl = document.querySelector(`[data-page="${pageId}"]`);
+  if (navEl) navEl.classList.add('active');
+  if (pageId === 'overview') document.querySelector('[onclick="showPage(\'overview\')"]').classList.add('active');
+
+  currentPage = pageId;
+}
+
+// ── INIT ───────────────────────────────────────────────────────────────────
+async function init() {
+  try {
+    let csv = null;
+    const SHEET_URL_BASE = `https://docs.google.com/spreadsheets/d/${SHEET_ID}`;
+
+    const isValidCSV = t => t && t.length > 200
+      && !t.includes('accounts.google.com')
+      && !t.includes('<!DOCTYPE')
+      && (t.toUpperCase().includes('JAN') || t.toUpperCase().includes('GOAL'));
+
+    try {
+      const url = `${SHEET_URL_BASE}/gviz/tq?tqx=out:csv&gid=${SHEET_GID}`;
+      const r = await fetch(url);
+      const text = await r.text();
+      if (isValidCSV(text)) { csv = text; console.log('[Dashboard] ✓ gviz loaded, bytes:', text.length); }
+      else console.warn('[Dashboard] gviz returned invalid data');
+    } catch(e) { console.warn('[Dashboard] gviz failed:', e.message); }
+
+    if (!csv) {
+      try {
+        const url = `${SHEET_URL_BASE}/export?format=csv&gid=${SHEET_GID}`;
+        const r = await fetch(url);
+        const text = await r.text();
+        if (isValidCSV(text)) { csv = text; console.log('[Dashboard] ✓ export loaded, bytes:', text.length); }
+      } catch(e) { console.warn('[Dashboard] export failed:', e.message); }
+    }
+
+    if (!csv) throw new Error('Could not load sheet data. Ensure sheet is set to "Anyone with the link can view".');
+
+    companies = parseAllCompanies(csv);
+    if (companies.length === 0) throw new Error('No companies found');
+
+    // Build nav
+    const navEl = document.getElementById('navLinks');
+    navEl.innerHTML = '';
+
+    const BRAND_GROUPS = [
+      {
+        brand: 'Millers Pools',
+        color: '#47c4ff',
+        subgroups: [
+          { label: 'Maintenance', color: '#47c4ff', items: [
+            { label: 'Cape Cod', match: n => n.includes('MP Maintenance') && n.includes('Cape Cod') },
+            { label: "Martha's Vineyard", match: n => n.includes('MP Maintenance') && n.includes('MV') },
+          ]},
+          { label: 'Construction', color: '#e8ff47', items: [
+            { label: 'Cape Cod', match: n => n.includes('MP Construction') && n.includes('Cape Cod') },
+            { label: "Martha's Vineyard", match: n => n.includes('MP Construction') && n.includes('MV') },
+          ]},
+          { label: 'Repair', color: '#fb923c', items: [
+            { label: 'Cape Cod', match: n => n.includes('MP Repair') && n.includes('Cape Cod') },
+            { label: "Martha's Vineyard", match: n => n.includes('MP Repair') && n.includes('MV') },
+          ]}
+        ]
+      },
+      {
+        brand: 'Millers Landscape',
+        color: '#4ade80',
+        subgroups: [
+          { label: 'Construction', color: '#ff6b47', items: [
+            { label: 'Construction', match: n => n.includes('MPL Construction') },
+          ]},
+          { label: 'Maintenance', color: '#4ade80', items: [
+            { label: 'Maintenance', match: n => n.includes('MPL Maintenance') },
+          ]},
+          { label: 'Repair', color: '#f472b6', items: [
+            { label: 'Repair', match: n => n.includes('MPL Repair') },
+          ]}
+        ]
+      },
+      {
+        brand: 'Millers Roofing',
+        color: '#a78bfa',
+        subgroups: [{ label: null, color: '#a78bfa', items: [
+          { label: 'Cape Cod', match: n => n.includes('RNS') && n.includes('Cape Cod') },
+          { label: "Martha's Vineyard", match: n => n.includes('RNS') && n.includes('MV') },
+        ]}]
+      },
+      {
+        brand: 'Millers Pro Builders',
+        color: '#f472b6',
+        subgroups: [{ label: null, color: '#f472b6', items: [
+          { label: 'Cape Cod', match: n => n.includes('MPC') && n.includes('Cape Cod') },
+          { label: "Martha's Vineyard", match: n => n.includes('MPC') && n.includes('MV') },
+        ]}]
+      }
+    ];
+
+    function makeCollapsible(headerEl, itemsEl, itemCount) {
+      const totalH = itemCount * 36 + 8;
+      itemsEl.style.maxHeight = totalH + 'px';
+      headerEl.onclick = () => {
+        const arrow = headerEl.querySelector('.nav-group-arrow');
+        const isOpen = !itemsEl.classList.contains('collapsed');
+        if (isOpen) { itemsEl.classList.add('collapsed'); if(arrow) arrow.classList.remove('open'); }
+        else { itemsEl.style.maxHeight = totalH + 'px'; itemsEl.classList.remove('collapsed'); if(arrow) arrow.classList.add('open'); }
+      };
+    }
+
+    BRAND_GROUPS.forEach(brand => {
+      const brandMatches = [];
+      brand.subgroups.forEach(sg => {
+        sg.items.forEach(it => {
+          companies.forEach((c, i) => {
+            if (it.match(c.name)) brandMatches.push({ label: it.label, idx: i, sgLabel: sg.label, sgColor: sg.color });
+          });
+        });
+      });
+      if (brandMatches.length === 0) return;
+
+      const brandEl = document.createElement('div');
+      brandEl.className = 'nav-group';
+
+      const brandHeader = document.createElement('div');
+      brandHeader.className = 'nav-group-header';
+      brandHeader.innerHTML = `<div class="nav-group-label"><span class="group-dot" style="background:${brand.color}"></span>${brand.brand}</div><span class="nav-group-arrow open">▶</span>`;
+
+      const brandItemsEl = document.createElement('div');
+      brandItemsEl.className = 'nav-group-items';
+
+      let totalSubItems = 0;
+      brand.subgroups.forEach(sg => {
+        const sgItems = sg.items.map(it => {
+          const idx = companies.findIndex(c => it.match(c.name));
+          return idx > -1 ? { label: it.label, idx, color: companies[idx].color } : null;
+        }).filter(Boolean);
+
+        if (sgItems.length === 0) return;
+
+        if (sg.label) {
+          const sgEl = document.createElement('div');
+          sgEl.className = 'nav-group';
+          sgEl.style.marginLeft = '0';
+
+          const sgHeader = document.createElement('div');
+          sgHeader.className = 'nav-group-header';
+          sgHeader.style.paddingLeft = '28px';
+          sgHeader.style.paddingTop = '6px';
+          sgHeader.style.paddingBottom = '4px';
+          sgHeader.innerHTML = `<div class="nav-group-label" style="font-size:10px;color:var(--muted)"><span class="group-dot" style="background:${sg.color};width:6px;height:6px"></span>${sg.label}</div><span class="nav-group-arrow open" style="font-size:8px">▶</span>`;
+
+          const sgItemsEl = document.createElement('div');
+          sgItemsEl.className = 'nav-group-items';
+
+          sgItems.forEach(({ label, idx, color }) => {
+            const item = document.createElement('div');
+            item.className = 'nav-item sub';
+            item.style.paddingLeft = '44px';
+            item.setAttribute('data-page', 'company-' + idx);
+            item.innerHTML = `<span class="nav-dot" style="background:${color}"></span>${label}`;
+            item.onclick = () => showPage('company-' + idx);
+            sgItemsEl.appendChild(item);
+            totalSubItems++;
+          });
+
+          makeCollapsible(sgHeader, sgItemsEl, sgItems.length);
+          sgEl.appendChild(sgHeader);
+          sgEl.appendChild(sgItemsEl);
+          brandItemsEl.appendChild(sgEl);
+          totalSubItems++;
+        } else {
+          sgItems.forEach(({ label, idx, color }) => {
+            const item = document.createElement('div');
+            item.className = 'nav-item sub';
+            item.style.paddingLeft = '32px';
+            item.setAttribute('data-page', 'company-' + idx);
+            item.innerHTML = `<span class="nav-dot" style="background:${color}"></span>${label}`;
+            item.onclick = () => showPage('company-' + idx);
+            brandItemsEl.appendChild(item);
+            totalSubItems++;
+          });
+        }
+      });
+
+      makeCollapsible(brandHeader, brandItemsEl, totalSubItems);
+      brandEl.appendChild(brandHeader);
+      brandEl.appendChild(brandItemsEl);
+      navEl.appendChild(brandEl);
+    });
+
+    // Build company pages
+    const pagesEl = document.getElementById('companyPages');
+    pagesEl.innerHTML = companies.map((c, i) => buildCompanyPage(c, i)).join('');
+
+    renderOverview();
+    document.getElementById('loader').style.display = 'none';
+
+  } catch(err) {
+    document.getElementById('loader').innerHTML = `
+      <div style="text-align:center;padding:40px;max-width:480px">
+        <div style="color:#f87171;font-family:'DM Mono',monospace;font-size:13px;margin-bottom:12px">⚠ FAILED TO LOAD</div>
+        <div style="color:#5a6180;font-size:12px;font-family:'DM Mono',monospace;margin-bottom:16px">${err.message}</div>
+        <div style="color:#5a6180;font-size:11px;font-family:'DM Mono',monospace;line-height:1.8">Ensure sheet is set to<br><strong style="color:#e8ff47">"Anyone with the link can view"</strong></div>
+        <button onclick="location.reload()" style="margin-top:20px;background:#e8ff47;color:#000;border:none;padding:10px 24px;border-radius:8px;font-family:'DM Mono',monospace;cursor:pointer;font-size:12px">↻ RETRY</button>
+      </div>`;
+    console.error(err);
+  }
+}
+
+init();
+</script>
+</body>
+</html>
