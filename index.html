@@ -240,12 +240,12 @@ const DIVISION_MAP = [
   { keys: ['MPL MAINTENANCE', 'MPL MAINT', 'LANDSCAPE MAINTENANCE'], name: 'MPL Maintenance' },
   // Landscape Repair
   { keys: ['MPL REPAIR', 'MPL REP ', 'LANDSCAPE REPAIR'], name: 'MPL Repair' },
-  // Roofing
-  { keys: ['RNS CAPE COD', 'RNS CC', 'ROOFING CAPE COD', 'MILLERS ROOFING CAPE'], name: 'RNS – Cape Cod' },
-  { keys: ['RNS MV', 'ROOFING MV', 'MILLERS ROOFING MV'], name: 'RNS – MV' },
+  // Roofing → Millers Roofing
+  { keys: ['RNS CAPE COD', 'RNS CC', 'ROOFING CAPE COD', 'MILLERS ROOFING CAPE'], name: 'Millers Roofing – Cape Cod' },
+  { keys: ['RNS MV', 'ROOFING MV', 'MILLERS ROOFING MV'], name: 'Millers Roofing – MV' },
   // Pro Builders
-  { keys: ['MPC CAPE COD', 'PRO BUILDERS CAPE', 'MILLERS PRO CAPE'], name: 'MPC – Cape Cod' },
-  { keys: ['MPC MV', 'PRO BUILDERS MV', 'MILLERS PRO MV'], name: 'MPC – MV' },
+  { keys: ['MPC CAPE COD', 'PRO BUILDERS CAPE', 'MILLERS PRO CAPE'], name: 'Millers Pro Builders – Cape Cod' },
+  { keys: ['MPC MV', 'PRO BUILDERS MV', 'MILLERS PRO MV'], name: 'Millers Pro Builders – MV' },
 ];
 
 function findCell(rows, keywordVariants) {
@@ -629,20 +629,20 @@ async function init() {
       && (t.toUpperCase().includes('JAN') || t.toUpperCase().includes('GOAL'));
 
     try {
+        const url = `${SHEET_URL_BASE}/gviz/tq?tqx=out:csv&gid=${SHEET_GID}`;
+        const r = await fetch(url);
+        const text = await r.text();
+        if (isValidCSV(text)) { csv = text; console.log('[Dashboard] ✓ export loaded, bytes:', text.length); }
+      } catch(e) { console.warn('[Dashboard] gviz failed:', e.message); }
+
+    if (!csv) {
+      try {
       const url = `${SHEET_URL_BASE}/export?format=csv&range=A1:Z50`;
       const r = await fetch(url);
       const text = await r.text();
       if (isValidCSV(text)) { csv = text; console.log('[Dashboard] ✓ gviz loaded, bytes:', text.length); }
       else console.warn('[Dashboard] gviz returned invalid data');
-    } catch(e) { console.warn('[Dashboard] gviz failed:', e.message); }
-
-    if (!csv) {
-      try {
-        const url = `${SHEET_URL_BASE}/gviz/tq?tqx=out:csv&gid=${SHEET_GID}`;
-        const r = await fetch(url);
-        const text = await r.text();
-        if (isValidCSV(text)) { csv = text; console.log('[Dashboard] ✓ export loaded, bytes:', text.length); }
-      } catch(e) { console.warn('[Dashboard] export failed:', e.message); }
+    } catch(e) { console.warn('[Dashboard] export failed:', e.message); }
     }
 
     if (!csv) throw new Error('Could not load sheet data. Ensure sheet is set to "Anyone with the link can view".');
