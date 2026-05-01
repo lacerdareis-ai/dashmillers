@@ -409,7 +409,6 @@ function parseAllCompanies(csv) {
   
   // DEBUG: log all matches
   console.log('[Dashboard] allMatches after DIVISION_MAP scan:', allMatches.map(m => ({name: m.name, row: m.row, col: m.col, keySample: rows[m.row][m.col]})));
-      if (window._debug) window._debug.update('allMatches: '+JSON.stringify(allMatches.map(m=>({name:m.name,row:m.row,col:m.col,key:rows[m.row][m.col]})).slice(0,20)));
 
   // --- Phase 2: extract each company ---
   console.log('[Dashboard] Starting extraction for', allMatches.length, 'matches');
@@ -420,7 +419,6 @@ function parseAllCompanies(csv) {
 
   // --- Phase 3: fallback broad scan if needed ---
   console.log('[Dashboard] result length before fallback:', result.length, result.map(c => c.name));
-      if (window._debug) window._debug.update('result pre-fallback: '+result.map(c=>c.name).join(', '));
   if (result.length < 5) {
     console.warn('[Dashboard] Only', result.length, 'companies found — running fallback scan');
     for (let r = 0; r < rows.length; r++) {
@@ -628,17 +626,8 @@ function showPage(pageId) {
 
 // Debug overlay
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => addDebugOverlay());
 } else {
-  addDebugOverlay();
 }
-function addDebugOverlay() {
-  const panel = document.createElement('div');
-  panel.id = 'debug-panel';
-  panel.style.cssText = 'position:fixed;top:10px;right:10px;background:rgba(0,0,0,0.9);color:#e8ff47;padding:15px;font:12px monospace;z-index:9999;max-height:80vh;overflow:auto;border:1px solid #333;border-radius:8px';
-  panel.innerHTML = '<strong>DEBUG</strong><div id=debug-content></div>';
-  document.body.appendChild(panel);
-  window._debug = {count:0, update:function(msg){ document.getElementById('debug-content').innerHTML += '<br>'+msg; }};
 }
 async function init() {
   try {
