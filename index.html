@@ -314,7 +314,8 @@ function findColNear(headerRow, startCol, keywords) {
 
 function extractCompany(rows, headerRowIdx, headerCol, companyName, color) {
   // Sub-header IS the same row as company header in this sheet
-  const subHeader = rows[headerRowIdx] || [];
+  const subHeaderRowIdx = findSubHeaderRow(rows, headerRowIdx, headerCol);
+  const subHeader = rows[subHeaderRowIdx] || [];
 
   // Find column indices relative to this company's block
   let goalUCol = findColNear(subHeader, headerCol, ['GOAL', 'U)', '(U)']);
@@ -332,7 +333,7 @@ function extractCompany(rows, headerRowIdx, headerCol, companyName, color) {
   let revenueCol = findColNear(subHeader, headerCol, ['SALE ($)', 'TOTAL', 'AMOUNT', 'REVENUE']);
   if (revenueCol === -1) revenueCol = goalDCol + 3;
 
-  const dataStartRow = headerRowIdx + 1;
+  const dataStartRow = subHeaderRowIdx + 1;
   let goalUnits = []; let goalDollars = []; let actualUnits = []; let revenue = [];
   let monthCount = 0;
 
@@ -628,7 +629,7 @@ async function init() {
       && (t.toUpperCase().includes('JAN') || t.toUpperCase().includes('GOAL'));
 
     try {
-      const url = `${SHEET_URL_BASE}/gviz/tq?tqx=out:csv&gid=${SHEET_GID}`;
+      const url = `${SHEET_URL_BASE}/export?format=csv`;
       const r = await fetch(url);
       const text = await r.text();
       if (isValidCSV(text)) { csv = text; console.log('[Dashboard] ✓ gviz loaded, bytes:', text.length); }
@@ -637,7 +638,7 @@ async function init() {
 
     if (!csv) {
       try {
-        const url = `${SHEET_URL_BASE}/export?format=csv&gid=${SHEET_GID}`;
+        const url = `${SHEET_URL_BASE}/gviz/tq?tqx=out:csv&gid=${SHEET_GID}`;
         const r = await fetch(url);
         const text = await r.text();
         if (isValidCSV(text)) { csv = text; console.log('[Dashboard] ✓ export loaded, bytes:', text.length); }
