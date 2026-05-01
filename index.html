@@ -629,20 +629,20 @@ async function init() {
       && (t.toUpperCase().includes('JAN') || t.toUpperCase().includes('GOAL'));
 
     try {
-        const url = `${SHEET_URL_BASE}/gviz/tq?tqx=out:csv&gid=${SHEET_GID}`;
-        const r = await fetch(url);
-        const text = await r.text();
-        if (isValidCSV(text)) { csv = text; console.log('[Dashboard] ✓ export loaded, bytes:', text.length); }
-      } catch(e) { console.warn('[Dashboard] gviz failed:', e.message); }
-
-    if (!csv) {
-      try {
       const url = `${SHEET_URL_BASE}/export?format=csv&range=A1:Z50`;
       const r = await fetch(url);
       const text = await r.text();
       if (isValidCSV(text)) { csv = text; console.log('[Dashboard] ✓ gviz loaded, bytes:', text.length); }
       else console.warn('[Dashboard] gviz returned invalid data');
-    } catch(e) { console.warn('[Dashboard] export failed:', e.message); }
+    } catch(e) { console.warn('[Dashboard] gviz failed:', e.message); }
+
+    if (!csv) {
+      try {
+        const url = `${SHEET_URL_BASE}/gviz/tq?tqx=out:csv&gid=${SHEET_GID}`;
+        const r = await fetch(url);
+        const text = await r.text();
+        if (isValidCSV(text)) { csv = text; console.log('[Dashboard] ✓ export loaded, bytes:', text.length); }
+      } catch(e) { console.warn('[Dashboard] export failed:', e.message); }
     }
 
     if (!csv) throw new Error('Could not load sheet data. Ensure sheet is set to "Anyone with the link can view".');
