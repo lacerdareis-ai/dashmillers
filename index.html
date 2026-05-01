@@ -629,7 +629,7 @@ async function init() {
       && (t.toUpperCase().includes('JAN') || t.toUpperCase().includes('GOAL'));
 
     try {
-      const url = `${SHEET_URL_BASE}/export?format=csv&range=A1:Z50`;
+      const url = `${SHEET_URL_BASE}/export?format=csv&range=A1:AP100:Z50`;
       const r = await fetch(url);
       const text = await r.text();
       if (isValidCSV(text)) { csv = text; console.log('[Dashboard] ✓ gviz loaded, bytes:', text.length); }
