@@ -406,14 +406,19 @@ function parseAllCompanies(csv) {
       allMatches.push({ ...pos, name: div.name });
     }
   });
+  
+  // DEBUG: log all matches
+  console.log('[Dashboard] allMatches after DIVISION_MAP scan:', allMatches.map(m => ({name: m.name, row: m.row, col: m.col, keySample: rows[m.row][m.col]})));
 
   // --- Phase 2: extract each company ---
+  console.log('[Dashboard] Starting extraction for', allMatches.length, 'matches');
   allMatches.forEach(m => {
     const comp = extractCompany(rows, m.row, m.col, m.name, nextColor());
     result.push(comp);
   });
 
   // --- Phase 3: fallback broad scan if needed ---
+  console.log('[Dashboard] result length before fallback:', result.length, result.map(c => c.name));
   if (result.length < 5) {
     console.warn('[Dashboard] Only', result.length, 'companies found — running fallback scan');
     for (let r = 0; r < rows.length; r++) {
