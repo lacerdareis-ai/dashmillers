@@ -166,7 +166,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
     </div>
     <div class="kpi-row" id="overviewKpis"></div>
     <div class="grid-2">
-      <div class="card"><div class="card-title"><span class="dot" style="background:#e8ff47"></span>Revenue Goal by Company</div><div class="chart-wrap"><canvas id="chartGoalByDiv"></canvas></div></div>
+      <div class="card"><div class="card-title"><span class="dot" style="background:#f59e0b"></span>Revenue Goal by Company</div><div class="chart-wrap"><canvas id="chartGoalByDiv"></canvas></div></div>
       <div class="card"><div class="card-title"><span class="dot" style="background:#47c4ff"></span>YTD Revenue by Company</div><div class="chart-wrap"><canvas id="chartRevenueByDiv"></canvas></div></div>
     </div>
     <div class="card"><div class="card-title"><span class="dot" style="background:#ff6b47"></span>% of Period Goal Achieved — All Companies</div><div class="chart-wrap-lg"><canvas id="chartPctAll"></canvas></div></div>
@@ -183,7 +183,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 const SHEET_ID = '1fpG2JnR1dTKvIEwKdS0iX77DJ1mTluJRIbuAj7gCpCY';
 const SHEET_GID = '1712249041';
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const PALETTE = ['#e8ff47','#47c4ff','#ff6b47','#4ade80','#a78bfa','#f472b6','#fb923c','#34d399','#60a5fa','#f472b6','#fdba74','#c4b5fd','#86efac'];
+const PALETTE = ['#f59e0b','#47c4ff','#ff6b47','#4ade80','#a78bfa','#f472b6','#fb923c','#34d399','#60a5fa','#f472b6','#fdba74','#c4b5fd','#86efac'];
 
 Chart.defaults.color = '#7A7A7A';
 Chart.defaults.borderColor = '#7A7A7A';
@@ -489,7 +489,7 @@ function renderOverview() {
 
   makeChart('chartPctAll', {
     type: 'bar',
-    data: { labels: names, datasets: [{ label: '% to Period Goal', data: companies.map(c => c.pctOfPeriodGoal), backgroundColor: companies.map(c => (c.pctOfPeriodGoal||0) >= 100 ? '#4ade8066' : (c.pctOfPeriodGoal||0) >= 50 ? '#e8ff4766' : '#f8717166'), borderColor: companies.map(c => (c.pctOfPeriodGoal||0) >= 100 ? '#4ade80' : (c.pctOfPeriodGoal||0) >= 50 ? '#e8ff47' : '#f87171'), borderWidth: 2, borderRadius: 5 }] },
+    data: { labels: names, datasets: [{ label: '% to Period Goal', data: companies.map(c => c.pctOfPeriodGoal), backgroundColor: companies.map(c => (c.pctOfPeriodGoal||0) >= 100 ? '#4ade8066' : (c.pctOfPeriodGoal||0) >= 50 ? '#f59e0b66' : '#f8717166'), borderColor: companies.map(c => (c.pctOfPeriodGoal||0) >= 100 ? '#4ade80' : (c.pctOfPeriodGoal||0) >= 50 ? '#f59e0b' : '#f87171'), borderWidth: 2, borderRadius: 5 }] },
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: v => v+'%' }, grid: { color: '#7A7A7A' } }, x: { grid: { display: false }, ticks: { maxRotation: 45, font: { size: 9 } } } } }
   });
 
@@ -502,7 +502,7 @@ function renderOverview() {
     card.style.setProperty('--card-color', c.color);
     card.innerHTML = `
       <div class="company-card-name">${c.name}</div>
-      <div class="company-card-pct" style="color:${pct>=100?'#4ade80':pct>=50?'#e8ff47':'#f87171'}">${pct}%</div>
+      <div class="company-card-pct" style="color:${pct>=100?'#4ade80':pct>=50?'#f59e0b':'#f87171'}">${pct}%</div>
       <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:10px">of period goal</div>
       <div class="company-card-stats">
         <span>Goal: ${c.totalGoalUnits}u</span>
@@ -673,7 +673,7 @@ async function init() {
             { label: 'Cape Cod', match: n => n.includes('MP Maintenance') && n.includes('Cape Cod') },
             { label: "Martha's Vineyard", match: n => n.includes('MP Maintenance') && n.includes('MV') },
           ]},
-          { label: 'Construction', color: '#e8ff47', items: [
+          { label: 'Construction', color: '#f59e0b', items: [
             { label: 'Cape Cod', match: n => n.includes('MP Construction') && n.includes('Cape Cod') },
             { label: "Martha's Vineyard", match: n => n.includes('MP Construction') && n.includes('MV') },
           ]},
@@ -820,8 +820,8 @@ async function init() {
       <div style="text-align:center;padding:40px;max-width:480px">
         <div style="color:#f87171;font-family:'DM Mono',monospace;font-size:13px;margin-bottom:12px">⚠ FAILED TO LOAD</div>
         <div style="color:#7A7A7A;font-size:12px;font-family:'DM Mono',monospace;margin-bottom:16px">${err.message}</div>
-        <div style="color:#7A7A7A;font-size:11px;font-family:'DM Mono',monospace;line-height:1.8">Ensure sheet is set to<br><strong style="color:#e8ff47">"Anyone with the link can view"</strong></div>
-        <button onclick="location.reload()" style="margin-top:20px;background:#e8ff47;color:#000;border:none;padding:10px 24px;border-radius:8px;font-family:'DM Mono',monospace;cursor:pointer;font-size:12px">↻ RETRY</button>
+        <div style="color:#7A7A7A;font-size:11px;font-family:'DM Mono',monospace;line-height:1.8">Ensure sheet is set to<br><strong style="color:#f59e0b">"Anyone with the link can view"</strong></div>
+        <button onclick="location.reload()" style="margin-top:20px;background:#f59e0b;color:#000;border:none;padding:10px 24px;border-radius:8px;font-family:'DM Mono',monospace;cursor:pointer;font-size:12px">↻ RETRY</button>
       </div>`;
     console.error(err);
   }
