@@ -185,8 +185,8 @@ const SHEET_GID = '1712249041';
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const PALETTE = ['#e8ff47','#47c4ff','#ff6b47','#4ade80','#a78bfa','#f472b6','#fb923c','#34d399','#60a5fa','#f472b6','#fdba74','#c4b5fd','#86efac'];
 
-Chart.defaults.color = '#5a6180';
-Chart.defaults.borderColor = '#1f2433';
+Chart.defaults.color = '#64748b';
+Chart.defaults.borderColor = '#cbd5e1';
 Chart.defaults.font.family = "'DM Mono', monospace";
 
 let companies = [];
@@ -478,19 +478,19 @@ function renderOverview() {
   makeChart('chartGoalByDiv', {
     type: 'bar',
     data: { labels: names, datasets: [{ data: companies.map(c => c.totalGoalDollars), backgroundColor: colors.map(c => c+'33'), borderColor: colors, borderWidth: 2, borderRadius: 5 }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: v => '$'+(v/1e6).toFixed(0)+'M' }, grid: { color: '#1f2433' } }, x: { grid: { display: false }, ticks: { maxRotation: 45, font: { size: 9 } } } } }
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: v => '$'+(v/1e6).toFixed(0)+'M' }, grid: { color: '#cbd5e1' } }, x: { grid: { display: false }, ticks: { maxRotation: 45, font: { size: 9 } } } } }
   });
 
   makeChart('chartRevenueByDiv', {
     type: 'bar',
     data: { labels: names, datasets: [{ data: companies.map(c => c.totalRevenue), backgroundColor: colors.map(c => c+'88'), borderColor: colors, borderWidth: 2, borderRadius: 5 }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: v => '$'+(v/1000).toFixed(0)+'K' }, grid: { color: '#1f2433' } }, x: { grid: { display: false }, ticks: { maxRotation: 45, font: { size: 9 } } } } }
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: v => '$'+(v/1000).toFixed(0)+'K' }, grid: { color: '#cbd5e1' } }, x: { grid: { display: false }, ticks: { maxRotation: 45, font: { size: 9 } } } } }
   });
 
   makeChart('chartPctAll', {
     type: 'bar',
     data: { labels: names, datasets: [{ label: '% to Period Goal', data: companies.map(c => c.pctOfPeriodGoal), backgroundColor: companies.map(c => (c.pctOfPeriodGoal||0) >= 100 ? '#4ade8066' : (c.pctOfPeriodGoal||0) >= 50 ? '#e8ff4766' : '#f8717166'), borderColor: companies.map(c => (c.pctOfPeriodGoal||0) >= 100 ? '#4ade80' : (c.pctOfPeriodGoal||0) >= 50 ? '#e8ff47' : '#f87171'), borderWidth: 2, borderRadius: 5 }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: v => v+'%' }, grid: { color: '#1f2433' } }, x: { grid: { display: false }, ticks: { maxRotation: 45, font: { size: 9 } } } } }
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: v => v+'%' }, grid: { color: '#cbd5e1' } }, x: { grid: { display: false }, ticks: { maxRotation: 45, font: { size: 9 } } } } }
   });
 
   const cardsEl = document.getElementById('companyCards');
@@ -566,7 +566,7 @@ function renderCompanyCharts(c, idx) {
       { label: 'Goal', data: c.goalUnits, backgroundColor: c.color+'33', borderColor: c.color, borderWidth: 2, borderRadius: 4 },
       { label: 'Actual', data: c.actual, backgroundColor: '#47c4ff88', borderColor: '#47c4ff', borderWidth: 2, borderRadius: 4 }
     ]},
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#5a6180', font: { size: 11 }, boxWidth: 12 } } }, scales: { y: { grid: { color: '#1f2433' }, beginAtZero: true, ticks: { color: '#5a6180' } }, x: { grid: { display: false }, ticks: { color: '#5a6180' } } } }
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#64748b', font: { size: 11 }, boxWidth: 12 } } }, scales: { y: { grid: { color: '#cbd5e1' }, beginAtZero: true, ticks: { color: '#64748b' } }, x: { grid: { display: false }, ticks: { color: '#64748b' } } } }
   });
 
   makeChart(`chart-${idx}-revenue`, {
@@ -575,7 +575,7 @@ function renderCompanyCharts(c, idx) {
       { label: 'Goal ($)', data: c.goalDollars, backgroundColor: c.color+'33', borderColor: c.color, borderWidth: 2, borderRadius: 4 },
       { label: 'Revenue', data: c.revenue, backgroundColor: '#47c4ff88', borderColor: '#47c4ff', borderWidth: 2, borderRadius: 4 }
     ]},
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#5a6180', font: { size: 11 }, boxWidth: 12 } } }, scales: { y: { ticks: { callback: v => '$'+(v/1000).toFixed(0)+'K', color: '#5a6180' }, grid: { color: '#1f2433' }, beginAtZero: true }, x: { grid: { display: false }, ticks: { color: '#5a6180' } } } }
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#64748b', font: { size: 11 }, boxWidth: 12 } } }, scales: { y: { ticks: { callback: v => '$'+(v/1000).toFixed(0)+'K', color: '#64748b' }, grid: { color: '#cbd5e1' }, beginAtZero: true }, x: { grid: { display: false }, ticks: { color: '#64748b' } } } }
   });
 
   let html = `<thead><tr><th>Month</th><th>Goal (U)</th><th>Actual (U)</th><th>Variance</th><th>% Goal</th><th>Goal ($)</th><th>Revenue</th><th>Rev Var</th></tr></thead><tbody>`;
@@ -819,8 +819,8 @@ async function init() {
     document.getElementById('loader').innerHTML = `
       <div style="text-align:center;padding:40px;max-width:480px">
         <div style="color:#f87171;font-family:'DM Mono',monospace;font-size:13px;margin-bottom:12px">⚠ FAILED TO LOAD</div>
-        <div style="color:#5a6180;font-size:12px;font-family:'DM Mono',monospace;margin-bottom:16px">${err.message}</div>
-        <div style="color:#5a6180;font-size:11px;font-family:'DM Mono',monospace;line-height:1.8">Ensure sheet is set to<br><strong style="color:#e8ff47">"Anyone with the link can view"</strong></div>
+        <div style="color:#64748b;font-size:12px;font-family:'DM Mono',monospace;margin-bottom:16px">${err.message}</div>
+        <div style="color:#64748b;font-size:11px;font-family:'DM Mono',monospace;line-height:1.8">Ensure sheet is set to<br><strong style="color:#e8ff47">"Anyone with the link can view"</strong></div>
         <button onclick="location.reload()" style="margin-top:20px;background:#e8ff47;color:#000;border:none;padding:10px 24px;border-radius:8px;font-family:'DM Mono',monospace;cursor:pointer;font-size:12px">↻ RETRY</button>
       </div>`;
     console.error(err);
