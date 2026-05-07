@@ -86,7 +86,7 @@ export default function App() {
   const metrics = calculateMetrics()
 
   return (
-    <div style={{ backgroundColor: COLORS.bg, color: COLORS.white, minHeight: '100vh', fontFamily: 'Inter, sans-serif' }}>
+    <div style={{ backgroundColor: COLORS.bg, color: COLORS.white, minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: 'Inter, sans-serif' }}>
       {/* Header */}
       <div style={{ backgroundColor: COLORS.bgSection, padding: '2rem', borderBottom: `1px solid ${COLORS.lightGray}` }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
@@ -98,7 +98,7 @@ export default function App() {
       </div>
 
       {/* Main Content */}
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem 1rem' }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem 1rem', flex: 1, width: '100%' }}>
         {error && (
           <div style={{ backgroundColor: '#8b0000', padding: '1rem', borderRadius: '0.5rem', marginBottom: '2rem' }}>
             {error}
@@ -201,6 +201,36 @@ export default function App() {
           </>
         )}
       </div>
+
+      {/* Footer */}
+      <footer style={{ backgroundColor: COLORS.bgSection, borderTop: `1px solid ${COLORS.lightGray}`, padding: '2rem', marginTop: 'auto' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <div>
+              <p style={{ margin: '0 0 0.5rem 0', color: COLORS.gray, fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Connect with The Power Coffee
+              </p>
+              <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
+                <a href="https://thepowercoffee.com" target="_blank" rel="noopener noreferrer" style={{ color: COLORS.accent, textDecoration: 'none', fontSize: '0.95rem', transition: 'opacity 0.2s' }}>
+                  Website
+                </a>
+                <a href="https://instagram.com/powercoffee.ofc" target="_blank" rel="noopener noreferrer" style={{ color: COLORS.accent, textDecoration: 'none', fontSize: '0.95rem' }}>
+                  Instagram
+                </a>
+                <a href="https://a.co/d/09Gmr1Sq" target="_blank" rel="noopener noreferrer" style={{ color: COLORS.accent, textDecoration: 'none', fontSize: '0.95rem' }}>
+                  Amazon
+                </a>
+                <a href="https://higgsfield.ai/@thepowercoffee" target="_blank" rel="noopener noreferrer" style={{ color: COLORS.accent, textDecoration: 'none', fontSize: '0.95rem' }}>
+                  Higgsfield
+                </a>
+              </div>
+            </div>
+          </div>
+          <p style={{ margin: 0, color: COLORS.gray, fontSize: '0.85rem', borderTop: `1px solid ${COLORS.lightGray}`, paddingTop: '1.5rem' }}>
+            ⚡ The Power Coffee — Fuel the people who show up fully every day.
+          </p>
+        </div>
+      </footer>
     </div>
   )
 }
