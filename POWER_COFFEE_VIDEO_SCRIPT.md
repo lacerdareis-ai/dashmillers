@@ -27,19 +27,31 @@
 ---
 
 ### SCENE 2: The Ritual (5-15 seconds)
-**Visual:** Close-up shots of people preparing and enjoying The Power Coffee
+**Visual:** Close-up shots of people actively brewing and adding Power Coffee to their setup
 
 **Description:**
-- Shot 1: Hands pouring Power Coffee into a sleek mug (close-up)
-- Shot 2: Woman smelling the aroma, eyes lighting up
-- Shot 3: Man taking first sip in his home gym
-- Shot 4: Professional woman at her desk, energized by the first sip
-- Shot 5: Group of friends sharing Power Coffee before their morning run
+- Shot 1: Extreme close-up: Woman's hands opening Power Coffee bag, aroma visible
+- Shot 2: Man pouring fresh ground Power Coffee beans into French press (macro shot, steam rising)
+- Shot 3: Professional woman's hands carefully measuring Power Coffee grounds into her espresso machine
+- Shot 4: Young person pouring hot water over Power Coffee in a pour-over dripper (dynamic, flowing water)
+- Shot 5: Athlete's hands adding Power Coffee to their Aeropress, concentrated focus
+- Shot 6: Quick cut: Different person's face as they smell the freshly brewed aroma (eyes brighten)
 
 **Voiceover:**
 > "One cup. Pure intention. That's The Power Coffee difference."
 
-**Visual Element:** Show the product packaging prominently in at least 2 shots
+**Visual Strategy:** 
+- All shots from POV of the person brewing
+- Emphasize the sensory experience: hands, steam, water, aroma
+- Show Power Coffee packaging/product in 3+ shots
+- Slow-motion on the pouring moments for premium feel
+- Warm, golden lighting highlighting the brewing ritual
+
+**Sound Design:**
+- Water pouring
+- Coffee being ground
+- Brewing equipment sounds (subtle)
+- Brewing becomes part of the soundtrack
 
 ---
 
@@ -160,11 +172,28 @@ one professional at home office, one young entrepreneur.
 Warm, aspirational, premium aesthetic.
 ```
 
-**Prompt 2 - Product Moment:**
+**Prompt 2a - Opening the Brew:**
 ```
-Close-up hands pouring fresh black coffee into premium white ceramic mug. 
-Artistic, macro photography style. Steam rising. Golden morning light. 
-Product packaging visible in background. Luxurious, inviting.
+Extreme close-up of woman's hands opening a Power Coffee bag, 
+fresh coffee aroma visible as steam rises. Macro photography. 
+Golden morning light. Product packaging prominent. Premium, artisanal feel.
+```
+
+**Prompt 2b - Brewing Sequence:**
+```
+Multiple close-up angles of people brewing Power Coffee: 
+- Man pouring ground coffee into French press with steam
+- Woman measuring coffee into espresso machine with focus
+- Athlete pouring hot water over pour-over dripper in slow motion
+- Close-up of coffee grounds being added to Aeropress
+Macro photography. Warm, golden lighting. Premium, intentional moments.
+```
+
+**Prompt 2c - The Aroma:**
+```
+Close-up of person's face (different people in sequence) smelling 
+freshly brewed Power Coffee. Eyes lighting up with anticipation. 
+Warm golden hour lighting. Sensory, intimate moment. Fresh steam visible.
 ```
 
 **Prompt 3 - Active People:**
