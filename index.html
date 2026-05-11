@@ -170,6 +170,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
       <div class="card"><div class="card-title"><span class="dot" style="background:#47c4ff"></span>YTD Revenue by Company</div><div class="chart-wrap"><canvas id="chartRevenueByDiv"></canvas></div></div>
     </div>
     <div class="card"><div class="card-title"><span class="dot" style="background:#ff6b47"></span>% of Period Goal Achieved — All Companies</div><div class="chart-wrap-lg"><canvas id="chartPctAll"></canvas></div></div>
+    <div class="card"><div class="card-title"><span class="dot" style="background:#47c4ff"></span>Pools — Cape Cod vs MV · Construction + Maintenance Combined (Units)</div><div class="chart-wrap-lg"><canvas id="chartPoolsCombined"></canvas></div></div>
     <div style="margin-bottom:12px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;">Click a company to view detailed Goals vs Sales</div>
     <div id="companyCards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:24px;"></div>
   </div>
@@ -491,6 +492,26 @@ function renderOverview() {
     type: 'bar',
     data: { labels: names, datasets: [{ label: '% to Period Goal', data: companies.map(c => c.pctOfPeriodGoal), backgroundColor: companies.map(c => (c.pctOfPeriodGoal||0) >= 100 ? '#4ade8066' : (c.pctOfPeriodGoal||0) >= 50 ? '#f59e0b66' : '#f8717166'), borderColor: companies.map(c => (c.pctOfPeriodGoal||0) >= 100 ? '#4ade80' : (c.pctOfPeriodGoal||0) >= 50 ? '#f59e0b' : '#f87171'), borderWidth: 2, borderRadius: 5 }] },
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: v => v+'%' }, grid: { color: '#7A7A7A' } }, x: { grid: { display: false }, ticks: { maxRotation: 45, font: { size: 9 } } } } }
+  });
+
+  const poolsConstrCC = companies.find(c => c.name.includes('MP Construction') && c.name.includes('Cape Cod'));
+  const poolsConstrMV = companies.find(c => c.name.includes('MP Construction') && c.name.includes('MV'));
+  const poolsMaintCC  = companies.find(c => c.name.includes('MP Maintenance') && c.name.includes('Cape Cod'));
+  const poolsMaintMV  = companies.find(c => c.name.includes('MP Maintenance') && c.name.includes('MV'));
+  const addMonthly = (a, b, field) => MONTHS.map((_, i) => {
+    const va = (a && a[field][i] != null) ? a[field][i] : 0;
+    const vb = (b && b[field][i] != null) ? b[field][i] : 0;
+    return (va + vb) || null;
+  });
+  makeChart('chartPoolsCombined', {
+    type: 'bar',
+    data: { labels: MONTHS, datasets: [
+      { label: 'Cape Cod — Goal', data: addMonthly(poolsConstrCC, poolsMaintCC, 'goalUnits'), backgroundColor: '#f59e0b22', borderColor: '#f59e0b', borderWidth: 2, borderRadius: 4, borderDash: [4,4] },
+      { label: 'Cape Cod — Actual', data: addMonthly(poolsConstrCC, poolsMaintCC, 'actual'), backgroundColor: '#f59e0b88', borderColor: '#f59e0b', borderWidth: 2, borderRadius: 4 },
+      { label: 'MV — Goal', data: addMonthly(poolsConstrMV, poolsMaintMV, 'goalUnits'), backgroundColor: '#47c4ff22', borderColor: '#47c4ff', borderWidth: 2, borderRadius: 4, borderDash: [4,4] },
+      { label: 'MV — Actual', data: addMonthly(poolsConstrMV, poolsMaintMV, 'actual'), backgroundColor: '#47c4ff88', borderColor: '#47c4ff', borderWidth: 2, borderRadius: 4 },
+    ]},
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#7A7A7A', font: { size: 11 }, boxWidth: 12 } } }, scales: { y: { beginAtZero: true, grid: { color: '#7A7A7A' }, ticks: { color: '#7A7A7A' } }, x: { grid: { display: false }, ticks: { color: '#7A7A7A' } } } }
   });
 
   const cardsEl = document.getElementById('companyCards');
