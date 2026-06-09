@@ -87,8 +87,8 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 
 /* TABLE */
 .data-table{width:100%;border-collapse:collapse;font-size:12px;}
-.data-table th{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:7px 10px;text-align:left;border-bottom:1px solid var(--border);}
-.data-table td{padding:9px 10px;border-bottom:1px solid var(--border);font-family:'DM Mono',monospace;font-size:11px;}
+.data-table th{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:12px 16px;text-align:left;border-bottom:1px solid var(--border);}
+.data-table td{padding:12px 16px;border-bottom:1px solid var(--border);font-family:'DM Mono',monospace;font-size:12px;}
 .data-table tr:last-child td{border-bottom:none;}
 .data-table tr:hover td{background:var(--surface);}
 .total-row td{font-weight:500;border-top:1px solid var(--border)!important;}
@@ -149,7 +149,21 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
       <div class="page-meta" id="overviewMeta">Loading...</div>
     </div>
     <div class="kpi-row" id="overviewKpis"></div>
-    <div id="companyCardsGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;"></div>
+    <div class="card" style="padding:0;overflow:hidden;">
+      <table class="data-table" id="companyTable">
+        <thead>
+          <tr>
+            <th>Company</th>
+            <th style="text-align:right">Goal</th>
+            <th style="text-align:right">Sales</th>
+            <th style="text-align:right">% to Goal</th>
+            <th style="width:180px">Progress</th>
+            <th style="text-align:right">Gap</th>
+          </tr>
+        </thead>
+        <tbody id="companyTableBody"></tbody>
+      </table>
+    </div>
   </div>
 
   <!-- COMPANY PAGES — generated dynamically -->
@@ -458,43 +472,33 @@ function renderOverview() {
     <div class="kpi" style="--kpi-color:var(--accent2)"><div class="kpi-label">Companies</div><div class="kpi-value">${companies.length}</div><div class="kpi-sub">Geographic splits</div><div class="kpi-badge badge-blue">Live</div></div>
     <div class="kpi" style="--kpi-color:#4ade80"><div class="kpi-label">Best Performer</div><div class="kpi-value" style="font-size:15px">${shortName(bestCo.name)}</div><div class="kpi-sub">${bestCo.pctOfPeriodGoal||0}% of period goal</div><div class="kpi-badge badge-green">🔥 Top</div></div>`;
 
-  const grid = document.getElementById('companyCardsGrid');
-  grid.innerHTML = '';
+  const tbody = document.getElementById('companyTableBody');
+  tbody.innerHTML = '';
 
   companies.filter(c => !c.name.toLowerCase().includes('repair')).forEach((c, i) => {
     const idx = companies.indexOf(c);
     const pct = c.pctOfPeriodGoal || 0;
     const gap = c.periodGoal - c.totalActual;
-    const pctColor  = pct >= 100 ? '#16a34a' : pct >= 60 ? '#d97706' : '#dc2626';
-    const barColor  = pct >= 100 ? '#16a34a' : pct >= 60 ? '#f59e0b' : '#ef4444';
-    const gapLabel  = gap > 0 ? `${gap} units short` : gap < 0 ? `${Math.abs(gap)} ahead` : 'on target';
+    const pctColor = pct >= 100 ? 'var(--green)' : pct >= 60 ? '#d97706' : 'var(--red)';
+    const barColor = pct >= 100 ? '#16a34a' : pct >= 60 ? '#f59e0b' : '#ef4444';
+    const gapText  = gap > 0 ? `-${gap}` : gap < 0 ? `+${Math.abs(gap)}` : '—';
+    const gapColor = gap > 0 ? 'var(--red)' : gap < 0 ? 'var(--green)' : 'var(--muted)';
 
-    const card = document.createElement('div');
-    card.className = 'company-card';
-    card.onclick = () => showPage('company-' + idx);
-    card.innerHTML = `
-      <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px">${c.name}</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:18px">
-        <div>
-          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px">Goal</div>
-          <div style="font-family:'Syne',sans-serif;font-size:30px;font-weight:700;line-height:1">${c.periodGoal}</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:4px">units</div>
+    const tr = document.createElement('tr');
+    tr.style.cursor = 'pointer';
+    tr.onclick = () => showPage('company-' + idx);
+    tr.innerHTML = `
+      <td style="font-weight:400;color:var(--text)">${c.name}</td>
+      <td style="text-align:right">${c.periodGoal}</td>
+      <td style="text-align:right">${c.totalActual}</td>
+      <td style="text-align:right;font-weight:500;color:${pctColor}">${pct}%</td>
+      <td style="padding-right:20px">
+        <div class="progress-track" style="height:4px">
+          <div class="progress-fill" style="--fill-color:${barColor};width:${Math.min(pct,100)}%"></div>
         </div>
-        <div>
-          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px">Sales</div>
-          <div style="font-family:'Syne',sans-serif;font-size:30px;font-weight:700;line-height:1">${c.totalActual}</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:4px">units</div>
-        </div>
-        <div>
-          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px">% to Goal</div>
-          <div style="font-family:'Syne',sans-serif;font-size:30px;font-weight:700;line-height:1;color:${pctColor}">${pct}%</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:4px">${gapLabel}</div>
-        </div>
-      </div>
-      <div class="progress-track">
-        <div class="progress-fill" style="--fill-color:${barColor};width:${Math.min(pct,100)}%"></div>
-      </div>`;
-    grid.appendChild(card);
+      </td>
+      <td style="text-align:right;color:${gapColor}">${gapText}</td>`;
+    tbody.appendChild(tr);
   });
 }
 
