@@ -149,15 +149,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
       <div class="page-meta" id="overviewMeta">Loading...</div>
     </div>
     <div class="kpi-row" id="overviewKpis"></div>
-    <div class="card"><div class="card-title"><span class="dot" style="background:#111"></span>Goal vs Actual — All Companies (YTD Units)</div><div style="position:relative;height:520px"><canvas id="chartGoalVsActual"></canvas></div></div>
-    <div class="grid-2">
-      <div class="card"><div class="card-title"><span class="dot" style="background:#f59e0b"></span>Revenue Goal by Company</div><div class="chart-wrap"><canvas id="chartGoalByDiv"></canvas></div></div>
-      <div class="card"><div class="card-title"><span class="dot" style="background:#47c4ff"></span>YTD Revenue by Company</div><div class="chart-wrap"><canvas id="chartRevenueByDiv"></canvas></div></div>
-    </div>
-    <div class="card"><div class="card-title"><span class="dot" style="background:#ff6b47"></span>% of Period Goal Achieved — All Companies</div><div class="chart-wrap-lg"><canvas id="chartPctAll"></canvas></div></div>
-    <div class="card"><div class="card-title"><span class="dot" style="background:#47c4ff"></span>Pools — Cape Cod vs MV · Construction + Maintenance Combined (Units)</div><div class="chart-wrap-lg"><canvas id="chartPoolsCombined"></canvas></div></div>
-    <div style="margin-bottom:12px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;">Click a company to view detailed Goals vs Sales</div>
-    <div id="companyCards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:24px;"></div>
+    <div id="companyCardsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;"></div>
   </div>
 
   <!-- COMPANY PAGES — generated dynamically -->
@@ -466,131 +458,43 @@ function renderOverview() {
     <div class="kpi" style="--kpi-color:var(--accent2)"><div class="kpi-label">Companies</div><div class="kpi-value">${companies.length}</div><div class="kpi-sub">Geographic splits</div><div class="kpi-badge badge-blue">Live</div></div>
     <div class="kpi" style="--kpi-color:#4ade80"><div class="kpi-label">Best Performer</div><div class="kpi-value" style="font-size:15px">${shortName(bestCo.name)}</div><div class="kpi-sub">${bestCo.pctOfPeriodGoal||0}% of period goal</div><div class="kpi-badge badge-green">🔥 Top</div></div>`;
 
-  const names = companies.map(c => shortName(c.name));
-  const colors = companies.map(c => c.color);
+  const grid = document.getElementById('companyCardsGrid');
+  grid.innerHTML = '';
 
-  // Goal vs Actual — horizontal bar, one row per company
-  makeChart('chartGoalVsActual', {
-    type: 'bar',
-    data: {
-      labels: companies.map(c => c.name),
-      datasets: [
-        {
-          label: 'Period Goal',
-          data: companies.map(c => c.periodGoal),
-          backgroundColor: '#ebebeb',
-          borderColor: '#d5d5d5',
-          borderWidth: 1,
-          borderRadius: 4,
-          barPercentage: 0.55,
-          categoryPercentage: 0.85
-        },
-        {
-          label: 'YTD Actual',
-          data: companies.map(c => c.totalActual),
-          backgroundColor: companies.map(c => c.color + 'cc'),
-          borderColor: companies.map(c => c.color),
-          borderWidth: 1,
-          borderRadius: 4,
-          barPercentage: 0.55,
-          categoryPercentage: 0.85
-        }
-      ]
-    },
-    options: {
-      indexAxis: 'y',
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { labels: { color: '#999', font: { size: 11 }, boxWidth: 12 } },
-        tooltip: {
-          callbacks: {
-            afterLabel: (ctx) => {
-              const c = companies[ctx.dataIndex];
-              if (ctx.datasetIndex === 1) {
-                const gap = c.periodGoal - c.totalActual;
-                return gap > 0 ? `Gap: ${gap} units behind` : `${Math.abs(gap)} units ahead`;
-              }
-            }
-          }
-        }
-      },
-      scales: {
-        x: { beginAtZero: true, grid: { color: '#e8e8e8' }, ticks: { color: '#999', font: { size: 10 } } },
-        y: { grid: { display: false }, ticks: { color: '#555', font: { size: 11 } } }
-      }
-    }
-  });
+  companies.forEach((c, i) => {
+    const pct = c.pctOfPeriodGoal || 0;
+    const gap = c.periodGoal - c.totalActual;
+    const pctColor  = pct >= 100 ? '#16a34a' : pct >= 60 ? '#d97706' : '#dc2626';
+    const barColor  = pct >= 100 ? '#16a34a' : pct >= 60 ? '#f59e0b' : '#ef4444';
+    const gapLabel  = gap > 0 ? `${gap} units short` : gap < 0 ? `${Math.abs(gap)} ahead` : 'on target';
 
-  makeChart('chartGoalByDiv', {
-    type: 'bar',
-    data: { labels: names, datasets: [{ data: companies.map(c => c.totalGoalDollars), backgroundColor: colors.map(c => c+'33'), borderColor: colors, borderWidth: 2, borderRadius: 5 }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: v => '$'+(v/1e6).toFixed(0)+'M' }, grid: { color: '#e0e0e0' } }, x: { grid: { display: false }, ticks: { maxRotation: 45, font: { size: 9 } } } } }
-  });
-
-  makeChart('chartRevenueByDiv', {
-    type: 'bar',
-    data: { labels: names, datasets: [{ data: companies.map(c => c.totalRevenue), backgroundColor: colors.map(c => c+'88'), borderColor: colors, borderWidth: 2, borderRadius: 5 }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: v => '$'+(v/1000).toFixed(0)+'K' }, grid: { color: '#e0e0e0' } }, x: { grid: { display: false }, ticks: { maxRotation: 45, font: { size: 9 } } } } }
-  });
-
-  makeChart('chartPctAll', {
-    type: 'bar',
-    data: { labels: names, datasets: [{ label: '% to Period Goal', data: companies.map(c => c.pctOfPeriodGoal), backgroundColor: companies.map(c => (c.pctOfPeriodGoal||0) >= 100 ? '#4ade8066' : (c.pctOfPeriodGoal||0) >= 50 ? '#f59e0b66' : '#f8717166'), borderColor: companies.map(c => (c.pctOfPeriodGoal||0) >= 100 ? '#4ade80' : (c.pctOfPeriodGoal||0) >= 50 ? '#f59e0b' : '#f87171'), borderWidth: 2, borderRadius: 5 }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: v => v+'%' }, grid: { color: '#e0e0e0' } }, x: { grid: { display: false }, ticks: { maxRotation: 45, font: { size: 9 } } } } }
-  });
-
-  const poolsConstrCC = companies.find(c => c.name.includes('MP Construction') && c.name.includes('Cape Cod'));
-  const poolsConstrMV = companies.find(c => c.name.includes('MP Construction') && c.name.includes('MV'));
-  const poolsMaintCC  = companies.find(c => c.name.includes('MP Maintenance') && c.name.includes('Cape Cod'));
-  const poolsMaintMV  = companies.find(c => c.name.includes('MP Maintenance') && c.name.includes('MV'));
-  const addMonthly = (a, b, field) => MONTHS.map((_, i) => {
-    const va = (a && a[field][i] != null) ? a[field][i] : 0;
-    const vb = (b && b[field][i] != null) ? b[field][i] : 0;
-    return (va + vb) || null;
-  });
-  makeChart('chartPoolsCombined', {
-    type: 'bar',
-    data: { labels: MONTHS, datasets: [
-      { label: 'Cape Cod — Goal', data: addMonthly(poolsConstrCC, poolsMaintCC, 'goalUnits'), backgroundColor: '#f59e0b22', borderColor: '#f59e0b', borderWidth: 2, borderRadius: 4, borderDash: [4,4] },
-      { label: 'Cape Cod — Actual', data: addMonthly(poolsConstrCC, poolsMaintCC, 'actual'), backgroundColor: '#f59e0b88', borderColor: '#f59e0b', borderWidth: 2, borderRadius: 4 },
-      { label: 'MV — Goal', data: addMonthly(poolsConstrMV, poolsMaintMV, 'goalUnits'), backgroundColor: '#47c4ff22', borderColor: '#47c4ff', borderWidth: 2, borderRadius: 4, borderDash: [4,4] },
-      { label: 'MV — Actual', data: addMonthly(poolsConstrMV, poolsMaintMV, 'actual'), backgroundColor: '#47c4ff88', borderColor: '#47c4ff', borderWidth: 2, borderRadius: 4 },
-    ]},
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#999', font: { size: 11 }, boxWidth: 12 } } }, scales: { y: { beginAtZero: true, grid: { color: '#e8e8e8' }, ticks: { color: '#999' } }, x: { grid: { display: false }, ticks: { color: '#999' } } } }
-  });
-
-  const cardsEl = document.getElementById('companyCards');
-  cardsEl.innerHTML = '';
-
-  function buildCombinedCard(label, color, comps) {
-    const totalGoalUnits = comps.reduce((s, c) => s + c.totalGoalUnits, 0);
-    const totalActual    = comps.reduce((s, c) => s + c.totalActual, 0);
-    const totalRevenue   = comps.reduce((s, c) => s + c.totalRevenue, 0);
-    const periodGoal     = comps.reduce((s, c) => s + c.periodGoal, 0);
-    const pct = periodGoal > 0 ? Math.round((totalActual / periodGoal) * 100) : 0;
     const card = document.createElement('div');
     card.className = 'company-card';
-    card.style.setProperty('--card-color', color);
+    card.onclick = () => showPage('company-' + i);
     card.innerHTML = `
-      <div class="company-card-name">${label}</div>
-      <div class="company-card-pct" style="color:${pct>=100?'#4ade80':pct>=50?'#f59e0b':'#f87171'}">${pct}%</div>
-      <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:10px">of period goal</div>
-      <div class="company-card-stats">
-        <span>Goal: ${totalGoalUnits}u</span>
-        <span>Actual: ${totalActual}u</span>
+      <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">${c.name}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">
+        <div>
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">Goal</div>
+          <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:700;line-height:1">${c.periodGoal}</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:3px">units</div>
+        </div>
+        <div>
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">Sales</div>
+          <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:700;line-height:1">${c.totalActual}</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:3px">units</div>
+        </div>
+        <div>
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">% to Goal</div>
+          <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:700;line-height:1;color:${pctColor}">${pct}%</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:3px">${gapLabel}</div>
+        </div>
       </div>
-      <div class="progress-track" style="margin-top:8px">
-        <div class="progress-fill" style="--fill-color:${color};width:${Math.min(pct,100)}%"></div>
-      </div>
-      <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:8px">Rev: $${totalRevenue.toLocaleString()}</div>`;
-    cardsEl.appendChild(card);
-  }
-
-  const constrComps = companies.filter(c => c.name.includes('MP Construction'));
-  const maintComps  = companies.filter(c => c.name.includes('MP Maintenance'));
-  if (constrComps.length) buildCombinedCard('Pools Construction', '#f59e0b', constrComps);
-  if (maintComps.length)  buildCombinedCard('Pools Maintenance',  '#47c4ff', maintComps);
+      <div class="progress-track">
+        <div class="progress-fill" style="--fill-color:${barColor};width:${Math.min(pct,100)}%"></div>
+      </div>`;
+    grid.appendChild(card);
+  });
 }
 
 // ── COMPANY PAGES ───────────────────────────────────────────────────────────
