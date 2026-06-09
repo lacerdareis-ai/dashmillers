@@ -349,15 +349,16 @@ function extractCompany(rows, headerRowIdx, headerCol, companyName, color) {
     goalUnits.push(num(row[goalUCol]));
     goalDollars.push(num(row[goalDCol]));
 
-    let au = 0;
-    if (newSaleCol !== -1 && existingCol !== -1) {
-      au = (num(row[newSaleCol]) || 0) + (num(row[existingCol]) || 0);
+    // Distinguish 0 (entered, tracked) from blank (not entered, null)
+    let au = null;
+    if (newSaleCol !== -1 || existingCol !== -1) {
+      const ns = newSaleCol !== -1 ? num(row[newSaleCol]) : null;
+      const ex = existingCol !== -1 ? num(row[existingCol]) : null;
+      if (ns !== null || ex !== null) au = (ns || 0) + (ex || 0);
     } else if (saleUCol !== -1) {
-      au = num(row[saleUCol]) || 0;
-    } else {
-      au = 0;
+      au = num(row[saleUCol]);
     }
-    actualUnits.push(au || null);
+    actualUnits.push(au);
     revenue.push(num(row[revenueCol]));
     monthCount++;
   }
@@ -367,12 +368,19 @@ function extractCompany(rows, headerRowIdx, headerCol, companyName, color) {
     actualUnits.push(null); revenue.push(null);
   }
 
+  // Treat blank cells in already-completed months as 0 (not yet entered = 0 sales)
+  const completedMonths = new Date().getMonth(); // 0-based: Jan=0 … current month excluded
+  for (let i = 0; i < Math.min(completedMonths, 12); i++) {
+    if (actualUnits[i] === null) actualUnits[i] = 0;
+  }
+
   const totalGoalUnits = goalUnits.reduce((s, v) => s + (v || 0), 0);
   const totalGoalDollars = goalDollars.reduce((s, v) => s + (v || 0), 0);
-  const totalActual = actualUnits.filter(v => v !== null).reduce((s, v) => s + v, 0);
+  const totalActual = actualUnits.reduce((s, v) => s + (v !== null ? v : 0), 0);
   const totalRevenue = revenue.filter(v => v !== null && v > 0).reduce((s, v) => s + v, 0);
   const trackedMonths = actualUnits.filter(v => v !== null).length;
-  const periodGoal = goalUnits.slice(0, trackedMonths).reduce((s, v) => s + (v || 0), 0);
+  // Sum goals only for the specific months that are tracked
+  const periodGoal = goalUnits.reduce((s, v, i) => s + (actualUnits[i] !== null ? (v || 0) : 0), 0);
   const pctOfPeriodGoal = periodGoal > 0 ? Math.round((totalActual / periodGoal) * 100) : null;
 
   return {
@@ -516,26 +524,35 @@ function renderOverview() {
 
   const cardsEl = document.getElementById('companyCards');
   cardsEl.innerHTML = '';
-  companies.forEach((c, i) => {
-    const pct = c.pctOfPeriodGoal || 0;
+
+  function buildCombinedCard(label, color, comps) {
+    const totalGoalUnits = comps.reduce((s, c) => s + c.totalGoalUnits, 0);
+    const totalActual    = comps.reduce((s, c) => s + c.totalActual, 0);
+    const totalRevenue   = comps.reduce((s, c) => s + c.totalRevenue, 0);
+    const periodGoal     = comps.reduce((s, c) => s + c.periodGoal, 0);
+    const pct = periodGoal > 0 ? Math.round((totalActual / periodGoal) * 100) : 0;
     const card = document.createElement('div');
     card.className = 'company-card';
-    card.style.setProperty('--card-color', c.color);
+    card.style.setProperty('--card-color', color);
     card.innerHTML = `
-      <div class="company-card-name">${c.name}</div>
+      <div class="company-card-name">${label}</div>
       <div class="company-card-pct" style="color:${pct>=100?'#4ade80':pct>=50?'#f59e0b':'#f87171'}">${pct}%</div>
       <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:10px">of period goal</div>
       <div class="company-card-stats">
-        <span>Goal: ${c.totalGoalUnits}u</span>
-        <span>Actual: ${c.totalActual}u</span>
+        <span>Goal: ${totalGoalUnits}u</span>
+        <span>Actual: ${totalActual}u</span>
       </div>
       <div class="progress-track" style="margin-top:8px">
-        <div class="progress-fill" style="--fill-color:${c.color};width:${Math.min(pct,100)}%"></div>
+        <div class="progress-fill" style="--fill-color:${color};width:${Math.min(pct,100)}%"></div>
       </div>
-      <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:8px">Rev: $${c.totalRevenue.toLocaleString()}</div>`;
-    card.onclick = () => showPage('company-' + i);
+      <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:8px">Rev: $${totalRevenue.toLocaleString()}</div>`;
     cardsEl.appendChild(card);
-  });
+  }
+
+  const constrComps = companies.filter(c => c.name.includes('MP Construction'));
+  const maintComps  = companies.filter(c => c.name.includes('MP Maintenance'));
+  if (constrComps.length) buildCombinedCard('Pools Construction', '#f59e0b', constrComps);
+  if (maintComps.length)  buildCombinedCard('Pools Maintenance',  '#47c4ff', maintComps);
 }
 
 // ── COMPANY PAGES ───────────────────────────────────────────────────────────
