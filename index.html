@@ -149,7 +149,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
       <div class="page-meta" id="overviewMeta">Loading...</div>
     </div>
     <div class="kpi-row" id="overviewKpis"></div>
-    <div id="companyCardsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;"></div>
+    <div id="companyCardsGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;"></div>
   </div>
 
   <!-- COMPANY PAGES — generated dynamically -->
@@ -461,7 +461,8 @@ function renderOverview() {
   const grid = document.getElementById('companyCardsGrid');
   grid.innerHTML = '';
 
-  companies.forEach((c, i) => {
+  companies.filter(c => !c.name.toLowerCase().includes('repair')).forEach((c, i) => {
+    const idx = companies.indexOf(c);
     const pct = c.pctOfPeriodGoal || 0;
     const gap = c.periodGoal - c.totalActual;
     const pctColor  = pct >= 100 ? '#16a34a' : pct >= 60 ? '#d97706' : '#dc2626';
@@ -470,24 +471,24 @@ function renderOverview() {
 
     const card = document.createElement('div');
     card.className = 'company-card';
-    card.onclick = () => showPage('company-' + i);
+    card.onclick = () => showPage('company-' + idx);
     card.innerHTML = `
-      <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">${c.name}</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">
+      <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px">${c.name}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:18px">
         <div>
-          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">Goal</div>
-          <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:700;line-height:1">${c.periodGoal}</div>
-          <div style="font-size:10px;color:var(--muted);margin-top:3px">units</div>
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px">Goal</div>
+          <div style="font-family:'Syne',sans-serif;font-size:30px;font-weight:700;line-height:1">${c.periodGoal}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">units</div>
         </div>
         <div>
-          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">Sales</div>
-          <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:700;line-height:1">${c.totalActual}</div>
-          <div style="font-size:10px;color:var(--muted);margin-top:3px">units</div>
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px">Sales</div>
+          <div style="font-family:'Syne',sans-serif;font-size:30px;font-weight:700;line-height:1">${c.totalActual}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">units</div>
         </div>
         <div>
-          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">% to Goal</div>
-          <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:700;line-height:1;color:${pctColor}">${pct}%</div>
-          <div style="font-size:10px;color:var(--muted);margin-top:3px">${gapLabel}</div>
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px">% to Goal</div>
+          <div style="font-family:'Syne',sans-serif;font-size:30px;font-weight:700;line-height:1;color:${pctColor}">${pct}%</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">${gapLabel}</div>
         </div>
       </div>
       <div class="progress-track">
